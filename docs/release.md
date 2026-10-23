@@ -1,19 +1,15 @@
 # 发布流程（从零到第一个 GitHub Release）
 
-## 0. 先改两个占位符
+## 0. 占位符已经填好了
 
-`package.json` 里的仓库地址现在是占位：
+`package.json` 里的仓库地址已经填成 `ningninger/eyerest`：
 
 ```json
-"homepage": "https://github.com/CHANGE_ME/eyerest",
-"repository": { "type": "git", "url": "https://github.com/CHANGE_ME/eyerest.git" }
+"homepage": "https://github.com/ningninger/eyerest",
+"repository": { "type": "git", "url": "https://github.com/ningninger/eyerest.git" }
 ```
 
-把 `CHANGE_ME` 换成你的 GitHub 用户名（或组织名）。同时 `build.appId`（现在是 `com.eyerest.app`）也建议改成你自己的域名倒写，这个值会写进 macOS 的包标识和 Windows 的卸载项，一旦发版改起来很麻烦。
-
-改完顺手把 `README.md` 里出现的仓库链接也换掉。
-
-改完提交一次：`git commit -am "chore: 填上仓库地址"`。
+如果要换成别的用户名或组织名，改上面两行再提交一次即可。`build.appId`（现在是 `com.eyerest.app`）也可以改成自己的域名倒写——它会写进 macOS 的包标识和 Windows 的卸载项，发版之后再改比较麻烦，首版前定好更省事。
 
 ## 1. 本地确认一次
 
@@ -25,18 +21,16 @@ npx electron .    # 能不能正常出托盘、点开设置页
 
 ## 2. 建远程仓库并推上去
 
-这个目录**已经 `git init` 并提交好了**（`git log` 能看到 `EyeRest 0.1.0`），只差一个远程：
+这个目录**已经 `git init` 并提交好了**（`git log` 能看到 `EyeRest 0.1.0`），远程也配好了（`git remote -v` 有 `origin`，走 SSH），只差 GitHub 上那个空仓库：
+
+1. 打开 <https://github.com/new>，仓库名填 `eyerest`，**不要**勾 "Add a README"、".gitignore"、"license"（要空的）；
+2. 回到这个目录执行：
 
 ```bash
-gh repo create eyerest --public --source=. --push   # 装了 gh 的话
-```
-
-没装 `gh` 就用网页版：在 GitHub 上新建一个**空**仓库（不要勾 README / .gitignore / license），然后
-
-```bash
-git remote add origin https://github.com/<你的用户名>/eyerest.git
 git push -u origin main
 ```
+
+这台机器的 SSH key 已经能登 GitHub（`ssh -T git@github.com` 返回 `Hi ningninger!`），所以不用再配 token。
 
 第一次 push 之后，GitHub Actions 里的 **CI** 会自动在 Linux / Windows / macOS 三个系统上跑测试（`.github/workflows/ci.yml`）。三个都绿了再发版。
 

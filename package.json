@@ -28,10 +28,10 @@
     "electron-builder": "^26.15.3"
   },
   "author": "EyeRest contributors",
-  "homepage": "https://github.com/CHANGE_ME/eyerest",
+  "homepage": "https://github.com/ningninger/eyerest",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CHANGE_ME/eyerest.git"
+    "url": "https://github.com/ningninger/eyerest.git"
   },
   "build": {
     "appId": "com.eyerest.app",
