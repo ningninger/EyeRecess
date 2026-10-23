@@ -3,9 +3,9 @@
  * 极简日志：同步写文件，保证「进程突然死掉」时最后一行也已经在磁盘上。
  *
  * 位置：
- *   macOS  ~/Library/Application Support/EyeRest/logs/eyerest.log
- *   Windows %APPDATA%\EyeRest\logs\eyerest.log
- * 超过 1 MB 时把旧文件改名成 eyerest.log.1，只留两代。
+ *   macOS  ~/Library/Application Support/EyeRecess/logs/eyerecess.log
+ *   Windows %APPDATA%\EyeRecess\logs\eyerecess.log
+ * 超过 1 MB 时把旧文件改名成 eyerecess.log.1，只留两代。
  *
  * 这个模块不依赖 electron，因为它可能要在 electron 还没就绪（甚至压根拿不到
  * app 对象）的时候就用。
@@ -20,14 +20,14 @@ let logFile = null;
 let ready = false;
 
 function fallbackDir() {
-  // EYEREST_LOG_DIR 给的是「精确目录」，启动器用它把日志直接落到项目里。
-  if (process.env.EYEREST_LOG_DIR) return process.env.EYEREST_LOG_DIR;
+  // EYERECESS_LOG_DIR 给的是「精确目录」，启动器用它把日志直接落到项目里。
+  if (process.env.EYERECESS_LOG_DIR) return process.env.EYERECESS_LOG_DIR;
   const base =
     process.env.APPDATA || // Windows
     process.env.HOME || // macOS / Linux
     process.env.TEMP ||
     '.';
-  return path.join(base, 'EyeRest', 'logs');
+  return path.join(base, 'EyeRecess', 'logs');
 }
 
 function stamp() {
@@ -59,7 +59,7 @@ function init(app) {
   try {
     let dir = null;
     // 启动器显式指定了日志目录：一直用它，别在 app ready 之后又挪走。
-    if (process.env.EYEREST_LOG_DIR) dir = process.env.EYEREST_LOG_DIR;
+    if (process.env.EYERECESS_LOG_DIR) dir = process.env.EYERECESS_LOG_DIR;
     if (!dir && app && typeof app.getPath === 'function') {
       try {
         dir = path.join(app.getPath('userData'), 'logs');
@@ -71,7 +71,7 @@ function init(app) {
     if (!dir && wasReady) return logFile;
     if (!dir) dir = fallbackDir();
     fs.mkdirSync(dir, { recursive: true });
-    const next = path.join(dir, 'eyerest.log');
+    const next = path.join(dir, 'eyerecess.log');
     if (next === logFile) return logFile;
     logFile = next;
     // 太大就滚动，避免无限增长

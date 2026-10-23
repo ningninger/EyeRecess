@@ -34,7 +34,7 @@ const REDIRECTS = new Set([301, 302, 303, 307, 308]);
 
 function get(url, { headers = {}, redirects = 6 } = {}) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers: { 'user-agent': 'eyerest-setup', ...headers } }, (res) => {
+    const req = https.get(url, { headers: { 'user-agent': 'eyerecess-setup', ...headers } }, (res) => {
       const code = res.statusCode || 0;
       if (REDIRECTS.has(code) && res.headers.location && redirects > 0) {
         res.resume();

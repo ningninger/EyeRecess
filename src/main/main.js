@@ -1,6 +1,6 @@
 'use strict';
 /**
- * EyeRest 主进程。
+ * EyeRecess 主进程。
  *
  * 分工：
  *  config.js  ｜ 参数与预设
@@ -19,7 +19,7 @@ const security = require('./security');
 /* ------ 这样即使进程马上死掉，磁盘上也有一行「我启动过」。            ------ */
 log.init(null);
 log.install();
-log.boot('==================== EyeRest 启动 ====================');
+log.boot('==================== EyeRecess 启动 ====================');
 log.boot('argv:', process.argv.slice(1).join(' ') || '(无参数)');
 log.boot('node:', process.versions.node, ' electron:', process.versions.electron || '(不是 Electron 进程)');
 log.boot('平台:', `${process.platform} ${process.arch}`, ' 日志文件:', log.path() || '(写不了)');
@@ -33,8 +33,8 @@ if (typeof electron === 'string' || !electron || !electron.app) {
   log.error('致命：Electron 没有以 GUI 模式运行，require("electron") 拿到的是', typeof electron);
   log.error('最常见原因：环境变量 ELECTRON_RUN_AS_NODE 被设置成了 1。');
   console.error('');
-  console.error('  [EyeRest] 启动失败：当前被当成普通 Node.js 脚本执行了，不是图形程序。');
-  console.error('  [EyeRest] 请先清掉环境变量 ELECTRON_RUN_AS_NODE 再重试：');
+  console.error('  [EyeRecess] 启动失败：当前被当成普通 Node.js 脚本执行了，不是图形程序。');
+  console.error('  [EyeRecess] 请先清掉环境变量 ELECTRON_RUN_AS_NODE 再重试：');
   console.error('            PowerShell:  Remove-Item env:ELECTRON_RUN_AS_NODE');
   console.error('');
   process.exit(2);
@@ -53,8 +53,8 @@ const {
 } = electron;
 
 // 开发与自动化测试时可以把配置目录重定向到项目内，避免写系统目录
-if (process.env.EYEREST_USER_DATA) {
-  app.setPath('userData', path.resolve(process.env.EYEREST_USER_DATA));
+if (process.env.EYERECESS_USER_DATA) {
+  app.setPath('userData', path.resolve(process.env.EYERECESS_USER_DATA));
 }
 
 log.init(app); // 拿到 app 之后把日志落到真正的 userData 目录
@@ -382,10 +382,10 @@ function updateTray(force = false) {
     }
   }
   const tip = resting
-    ? 'EyeRest · 正在休息'
+    ? 'EyeRecess · 正在休息'
     : isPaused()
-      ? `EyeRest · 已暂停（${Math.ceil((cfg.pausedUntil - Date.now()) / 60000)} 分钟）`
-      : `EyeRest · 连续用眼 ${fmtDur(p.streak)}，${fmtDur(p.microLeft)}后微休息`;
+      ? `EyeRecess · 已暂停（${Math.ceil((cfg.pausedUntil - Date.now()) / 60000)} 分钟）`
+      : `EyeRecess · 连续用眼 ${fmtDur(p.streak)}，${fmtDur(p.microLeft)}后微休息`;
   tray.setToolTip(tip);
 
   if (force || Date.now() - lastMenuBuild > 15000) {
@@ -452,13 +452,13 @@ function buildMenu() {
     { label: '设置…', click: () => openSettings() },
     { label: '今日统计', click: () => openSettings('stats') },
     { type: 'separator' },
-    { label: '退出 EyeRest', click: () => quitApp() },
+    { label: '退出 EyeRecess', click: () => quitApp() },
   ]);
 }
 
 function createTray() {
   tray = new Tray(icons.trayImage('idle'));
-  tray.setToolTip('EyeRest');
+  tray.setToolTip('EyeRecess');
   tray.setContextMenu(buildMenu());
   trayState = 'idle';
   if (process.platform === 'darwin') {
@@ -508,7 +508,7 @@ function openSettings(section) {
     height: 780,
     minWidth: 460,
     minHeight: 560,
-    title: 'EyeRest 设置',
+    title: 'EyeRecess 课间',
     backgroundColor: '#14161a',
     autoHideMenuBar: true,
     webPreferences: {
@@ -806,10 +806,10 @@ const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
   // 以前这里是静默 app.quit()：用户看到的就是「闪一下就没了、进程也找不到」。
   // 现在至少留一条能看懂的记录，并用非 0 退出码让 .cmd 停下来给提示。
-  log.warn('单实例锁被占用：已有另一个 EyeRest 在跑（或上一次崩溃留下了残留进程），本次退出。');
+  log.warn('单实例锁被占用：已有另一个 EyeRecess 在跑（或上一次崩溃留下了残留进程），本次退出。');
   console.warn('');
-  console.warn('  [EyeRest] 已经有一个 EyeRest 在运行了，不会再开第二个。');
-  console.warn('  [EyeRest] 如果你在托盘里看不到它，可能是上次崩溃留下的 electron.exe 僵尸进程：');
+  console.warn('  [EyeRecess] 已经有一个 EyeRecess 在运行了，不会再开第二个。');
+  console.warn('  [EyeRecess] 如果你在托盘里看不到它，可能是上次崩溃留下的 electron.exe 僵尸进程：');
   console.warn('            打开任务管理器 → 详细信息 → 找到 electron.exe → 结束任务，然后重试。');
   console.warn('');
   app.exit(3);
@@ -855,9 +855,9 @@ if (!gotLock) {
       app.dock?.hide();
     }
     const where = process.platform === 'darwin' ? '屏幕右上角的菜单栏' : '系统托盘';
-    console.log(`[EyeRest] 已启动，图标在${where}（蓝色圆环）。左键点它看菜单。`);
-    console.log('[EyeRest] 设置页、暂停、立即休息都在菜单里；要退出请用菜单里的「退出」。');
-    console.log(`[EyeRest] 日志：${log.path()}`);
+    console.log(`[EyeRecess] 已启动，图标在${where}（蓝色圆环）。左键点它看菜单。`);
+    console.log('[EyeRecess] 设置页、暂停、立即休息都在菜单里；要退出请用菜单里的「退出」。');
+    console.log(`[EyeRecess] 日志：${log.path()}`);
   }).catch((err) => {
     log.error('启动过程出错:', err);
     throw err;

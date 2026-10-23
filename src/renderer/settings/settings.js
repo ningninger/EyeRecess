@@ -238,7 +238,7 @@ function applyState(s, opts = {}) {
   const dockRow = $('row-hideDock');
   if (dockRow) dockRow.style.display = s.app.platform === 'darwin' ? '' : 'none';
   $('version').textContent = 'v' + s.app.version;
-  $('about').textContent = `EyeRest ${s.app.version} · Electron ${s.app.electron} · ${s.app.platform}\n配置与统计保存在：${s.app.configDir}`;
+  $('about').textContent = `EyeRecess（课间）${s.app.version} · Electron ${s.app.electron} · ${s.app.platform}\n配置与统计保存在：${s.app.configDir}`;
 }
 
 /* --------------------------------- 事件 ---------------------------------- */

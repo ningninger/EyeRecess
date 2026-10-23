@@ -21,7 +21,7 @@ chromium.log
 # 系统
 .DS_Store
 Thumbs.db
-# 运行日志（launch-*.log / eyerest.log / chromium-last.log）
+# 运行日志（launch-*.log / eyerecess.log / chromium-last.log）
 logs/
 # 打包产物
 dist/

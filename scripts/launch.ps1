@@ -1,8 +1,8 @@
-﻿# EyeRest 启动器（由 run-windows.cmd 调用，不要直接双击本文件）
+﻿# EyeRecess 启动器（由 run-windows.cmd 调用，不要直接双击本文件）
 # 本文件必须是 UTF-8 with BOM + CRLF，否则 Windows PowerShell 5.1 会把中文读成乱码。
 #
 # 这个脚本做四件事：
-#   1. 把 Electron 运行时复制到 %LOCALAPPDATA%\EyeRest\runtime（工作区目录的 ACL 有问题，
+#   1. 把 Electron 运行时复制到 %LOCALAPPDATA%\EyeRecess\runtime（工作区目录的 ACL 有问题，
 #      Chromium 在那棵树里启动会直接 CHECK 失败，详见 run-exe.ps1 的说明）
 #   2. 启动 App，等它退出，拿到真实退出码
 #   3. 把这次运行的完整信息同时打印到屏幕、写进 logs\launch-*.log
@@ -24,7 +24,7 @@ New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
 
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $runLog = Join-Path $logsDir ("launch-{0}.log" -f $stamp)
-$appLog = Join-Path $logsDir 'eyerest.log'
+$appLog = Join-Path $logsDir 'eyerecess.log'
 $chromiumLog = Join-Path $logsDir 'chromium-last.log'
 
 # 只留最近 20 份运行日志
@@ -42,7 +42,7 @@ function Line {
 }
 
 Line '=========================================================='
-Line ("EyeRest 启动记录  {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
+Line ("EyeRecess 启动记录  {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
 Line ("项目目录:   {0}" -f $proj)
 Line ("PowerShell: {0}" -f $PSVersionTable.PSVersion)
 Line '=========================================================='
@@ -52,12 +52,12 @@ Line '=========================================================='
 $env:ELECTRON_RUN_AS_NODE = ''
 
 # 让 App 自己的日志也落到项目里
-$env:EYEREST_LOG_DIR = $logsDir
+$env:EYERECESS_LOG_DIR = $logsDir
 
 $exe = Get-ElectronExe -Proj $proj
 if (-not $exe) {
   Line ''
-  Line '  [EyeRest] 还没有安装依赖。请先在这个目录里执行：'
+  Line '  [EyeRecess] 还没有安装依赖。请先在这个目录里执行：'
   Line ''
   Line '      npm install'
   Line ''
@@ -73,7 +73,7 @@ Line ("参数:       {0}" -f ($argsList -join ' '))
 Line ''
 
 if (-not $Smoke -and -not $Quiet) {
-  Line '  [EyeRest] 正在启动……'
+  Line '  [EyeRecess] 正在启动……'
   Line '  图标会出现在右下角的系统托盘（蓝色圆环），可能被收在向上箭头 ^ 的折叠区里。'
   Line '  这个窗口保持打开时程序才在运行；要退出请用托盘菜单里的「退出」。'
   Line ''
@@ -153,7 +153,7 @@ if ($r.StillRunning) {
 } elseif ($r.Code -eq 2) {
   Line '  [结论] Electron 被当成普通 Node 执行了（ELECTRON_RUN_AS_NODE 之类的问题）。'
 } elseif ($r.Code -eq 3) {
-  Line '  [结论] 已经有另一个 EyeRest 在跑。任务管理器 →「详细信息」→ 结束所有 electron.exe 再重试。'
+  Line '  [结论] 已经有另一个 EyeRecess 在跑。任务管理器 →「详细信息」→ 结束所有 electron.exe 再重试。'
 } elseif ($r.Code -eq -2147483645) {
   Line '  [结论] Electron 在原生初始化阶段就崩了（Chromium CHECK 失败 / STATUS_BREAKPOINT）。'
   Line '         这几乎总是「运行时所在目录的权限有问题」，请把 logs 目录整个发出来。'
@@ -169,7 +169,7 @@ Line ("本次日志: {0}" -f $runLog)
 if ($Quiet -and -not $r.StillRunning -and $r.Code -ne 0) {
   try {
     Add-Type -AssemblyName System.Windows.Forms | Out-Null
-    $msg = "EyeRest 没能正常启动（退出码 $($r.Code)）。`n`n诊断信息已经写进：`n$runLog`n`n把 logs 文件夹整个发出来就能定位问题。"
-    [System.Windows.Forms.MessageBox]::Show($msg, 'EyeRest 启动失败', 'OK', 'Warning') | Out-Null
+    $msg = "EyeRecess 没能正常启动（退出码 $($r.Code)）。`n`n诊断信息已经写进：`n$runLog`n`n把 logs 文件夹整个发出来就能定位问题。"
+    [System.Windows.Forms.MessageBox]::Show($msg, 'EyeRecess 启动失败', 'OK', 'Warning') | Out-Null
   } catch { }
 }

@@ -2,14 +2,14 @@
 
 ## 0. 占位符已经填好了
 
-`package.json` 里的仓库地址已经填成 `ningninger/eyerest`：
+`package.json` 里的仓库地址已经填成 `ningninger/eyerecess`：
 
 ```json
-"homepage": "https://github.com/ningninger/eyerest",
-"repository": { "type": "git", "url": "https://github.com/ningninger/eyerest.git" }
+"homepage": "https://github.com/ningninger/eyerecess",
+"repository": { "type": "git", "url": "https://github.com/ningninger/eyerecess.git" }
 ```
 
-如果要换成别的用户名或组织名，改上面两行再提交一次即可。`build.appId`（现在是 `com.eyerest.app`）也可以改成自己的域名倒写——它会写进 macOS 的包标识和 Windows 的卸载项，发版之后再改比较麻烦，首版前定好更省事。
+如果要换成别的用户名或组织名，改上面两行再提交一次即可。`build.appId`（现在是 `com.eyerecess.app`）也可以改成自己的域名倒写——它会写进 macOS 的包标识和 Windows 的卸载项，发版之后再改比较麻烦，首版前定好更省事。
 
 ## 1. 本地确认一次
 
@@ -21,9 +21,9 @@ npx electron .    # 能不能正常出托盘、点开设置页
 
 ## 2. 建远程仓库并推上去
 
-这个目录**已经 `git init` 并提交好了**（`git log` 能看到 `EyeRest 0.1.0`），远程也配好了（`git remote -v` 有 `origin`，走 SSH），只差 GitHub 上那个空仓库：
+这个目录**已经 `git init` 并提交好了**（`git log` 能看到 `EyeRecess 0.1.0`），远程也配好了（`git remote -v` 有 `origin`，走 SSH），只差 GitHub 上那个空仓库：
 
-1. 打开 <https://github.com/new>，仓库名填 `eyerest`，**不要**勾 "Add a README"、".gitignore"、"license"（要空的）；
+1. 打开 <https://github.com/new>，仓库名填 `eyerecess`，**不要**勾 "Add a README"、".gitignore"、"license"（要空的）；
 2. 回到这个目录执行：
 
 ```bash
@@ -47,8 +47,8 @@ git push origin v0.1.0
 
 | 平台 | 产物 |
 | --- | --- |
-| macOS | `EyeRest-0.1.0-arm64.dmg` / `-arm64.zip`（Apple Silicon）、`EyeRest-0.1.0-x64.dmg` / `-x64.zip`（Intel） |
-| Windows | `EyeRest Setup 0.1.0.exe`（安装版，可选安装目录）、`EyeRest-0.1.0-win.zip`（免安装，解压出 `EyeRest.exe` 直接跑） |
+| macOS | `EyeRecess-0.1.0-arm64.dmg` / `-arm64.zip`（Apple Silicon）、`EyeRecess-0.1.0-x64.dmg` / `-x64.zip`（Intel） |
+| Windows | `EyeRecess Setup 0.1.0.exe`（安装版，可选安装目录）、`EyeRecess-0.1.0-win.zip`（免安装，解压出 `EyeRecess.exe` 直接跑） |
 | 附加 | `SHA256SUMS.txt` |
 
 整个过程大概 10–15 分钟：mac 两个架构各要下一份 Electron，Windows 还要下 NSIS 打包工具。
@@ -59,7 +59,7 @@ git push origin v0.1.0
 
 两个平台都没有买证书，所以：
 
-- **macOS**：Gatekeeper 会拦。用户第一次要**右键 → 打开**，或者到「系统设置 → 隐私与安全性」点「仍要打开」。如果提示「已损坏，无法打开」，让他执行 `xattr -cr /Applications/EyeRest.app`（因为从网上下载的包带 quarantine 属性）。
+- **macOS**：Gatekeeper 会拦。用户第一次要**右键 → 打开**，或者到「系统设置 → 隐私与安全性」点「仍要打开」。如果提示「已损坏，无法打开」，让他执行 `xattr -cr /Applications/EyeRecess.app`（因为从网上下载的包带 quarantine 属性）。
   想彻底消掉这个提示需要 Apple Developer（99 美元/年）签名 + 公证（notarization），在 `build.mac` 里加 `notarize` 并配 `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID` 三个 secrets。
 - **Windows**：SmartScreen 会提示「未知发布者」→「更多信息」→「仍要运行」。要消掉需要 OV/EV 代码签名证书。
 
@@ -84,10 +84,10 @@ npm run dist:linux   # 只能在 Linux 上跑
 
   ```bash
   npx electron-builder --win zip --x64
-  # → dist\EyeRest-0.1.0-win.zip（146 MB）
+  # → dist\EyeRecess-0.1.0-win.zip（146 MB）
   ```
 
-  解压出来 `win-unpacked\EyeRest.exe` 可以直接双击运行，asar 打包、图标、托盘、安全策略都验证过没问题。
+  解压出来 `win-unpacked\EyeRecess.exe` 可以直接双击运行，asar 打包、图标、托盘、安全策略都验证过没问题。
 
 ## 6. 版本号怎么往下走
 

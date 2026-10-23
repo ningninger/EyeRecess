@@ -4,10 +4,10 @@ name: Release
 #   git tag v0.1.0 && git push origin v0.1.0
 #
 # 产物：
-#   macOS  EyeRest-<ver>-arm64.dmg / .zip（Apple Silicon）
-#          EyeRest-<ver>-x64.dmg   / .zip（Intel）
-#   Windows EyeRest Setup <ver>.exe（安装版）、EyeRest <ver>.exe（免安装单文件）
-#   Linux   EyeRest-<ver>.AppImage
+#   macOS  EyeRecess-<ver>-arm64.dmg / .zip（Apple Silicon）
+#          EyeRecess-<ver>-x64.dmg   / .zip（Intel）
+#   Windows EyeRecess Setup <ver>.exe（安装版）、EyeRecess <ver>.exe（免安装单文件）
+#   Linux   EyeRecess-<ver>.AppImage
 on:
   push:
     tags: ['v*']
@@ -103,13 +103,13 @@ jobs:
           prerelease: true
           generate_release_notes: true
           body: |
-            EyeRest ${{ github.ref_name }} —— 有证据支持的护眼休息提醒。
+            EyeRecess ${{ github.ref_name }} —— 有证据支持的护眼休息提醒。
 
             ## 安装
             - **macOS**：下载对应的 `.dmg`（Apple Silicon 选 `arm64`，Intel 选 `x64`），拖进「应用程序」。
               这个包**没有签名**，第一次打开请**右键 → 打开**（或到「系统设置 → 隐私与安全性」点「仍要打开」）。
-              如果提示「已损坏」，在终端执行：`xattr -cr /Applications/EyeRest.app`
-            - **Windows**：`EyeRest Setup <ver>.exe` 是安装版，`EyeRest <ver>.exe` 是免安装单文件。
+              如果提示「已损坏」，在终端执行：`xattr -cr /Applications/EyeRecess.app`
+            - **Windows**：`EyeRecess Setup <ver>.exe` 是安装版，`EyeRecess <ver>.exe` 是免安装单文件。
               没有代码签名，SmartScreen 可能提示「未知发布者」→「更多信息」→「仍要运行」。
 
             ## 这一版能做什么

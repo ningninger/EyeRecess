@@ -1,4 +1,4 @@
-﻿# EyeRest 自检脚本 —— 双击 diagnose.cmd 运行。
+﻿# EyeRecess 自检脚本 —— 双击 diagnose.cmd 运行。
 # 它不会改动任何东西，只是把「为什么起不来」需要的信息收集到《诊断报告.txt》。
 # 注意：本文件必须保存成 UTF-8 with BOM + CRLF，否则 Windows PowerShell 5.1 会把中文读成乱码。
 
@@ -39,7 +39,7 @@ function SayBlock([string]$text, [int]$maxLines = 40, [string]$prefix = '  | ') 
   foreach ($line in $all) { Say ($prefix + $line) }
 }
 
-Say 'EyeRest 诊断报告'
+Say 'EyeRecess 诊断报告'
 Say "生成时间：$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 Say "项目目录：$proj"
 Say '（这次运行会花 40 秒左右，中途可能弹出一个最小窗口，那是自检用的，会自动关掉）'
@@ -75,7 +75,7 @@ $dist = Join-Path $proj 'node_modules\electron\dist'
 $distExe = Join-Path $dist 'electron.exe'
 $exe = Get-ElectronExe -Proj $proj
 Say ("  实际运行时：{0}" -f $exe)
-Say '  * Electron 运行时会被复制到 %LOCALAPPDATA%\EyeRest\runtime 再启动。'
+Say '  * Electron 运行时会被复制到 %LOCALAPPDATA%\EyeRecess\runtime 再启动。'
 Say '    原因：这个工作区目录的 ACL 里有一条 Everyone 的继承拒绝项，Chromium 在这种目录里会直接崩。'
 if (Test-Path $distExe) {
   $f = Get-Item $distExe
@@ -92,8 +92,8 @@ foreach ($sub in @('src\main\main.js', 'src\main\log.js', 'src\preload\overlay.j
 
 # ---------------------------------------------------------------- 既有日志
 Head '4. 上一次运行留下的日志'
-$projLog = Join-Path $proj 'logs\eyerest.log'
-$logPath = if (Test-Path $projLog) { $projLog } else { Join-Path $env:APPDATA 'EyeRest\logs\eyerest.log' }
+$projLog = Join-Path $proj 'logs\eyerecess.log'
+$logPath = if (Test-Path $projLog) { $projLog } else { Join-Path $env:APPDATA 'EyeRecess\logs\eyerecess.log' }
 if (Test-Path $logPath) {
   Say "  日志文件：$logPath"
   Say "  大小：$((Get-Item $logPath).Length) 字节，最后修改：$((Get-Item $logPath).LastWriteTime)"
@@ -109,7 +109,7 @@ $env:ELECTRON_RUN_AS_NODE = ''
 
 # ---------------------------------------------------------------- 最小 Electron
 Head '5. 最小 Electron 窗口（判断是 Electron 坏了还是我们程序坏了）'
-$mini = Join-Path $env:TEMP ('eyerest-mini-' + [guid]::NewGuid().ToString('N').Substring(0, 6))
+$mini = Join-Path $env:TEMP ('eyerecess-mini-' + [guid]::NewGuid().ToString('N').Substring(0, 6))
 try {
   New-Item -ItemType Directory -Force -Path $mini | Out-Null
   $miniJs = @'
@@ -117,7 +117,7 @@ const { app, BrowserWindow } = require('electron');
 console.log('MINI-BOOT electron=' + process.versions.electron + ' node=' + process.versions.node);
 app.whenReady().then(() => {
   console.log('MINI-READY');
-  const w = new BrowserWindow({ width: 460, height: 240, title: 'EyeRest selfcheck' });
+  const w = new BrowserWindow({ width: 460, height: 240, title: 'EyeRecess selfcheck' });
   w.loadURL('data:text/html,<body style="font:16px system-ui;padding:24px">Electron OK</body>');
   setTimeout(() => { console.log('MINI-QUIT'); app.exit(0); }, 5000);
 }).catch((e) => { console.log('MINI-ERROR ' + e.message); app.exit(3); });
@@ -145,7 +145,7 @@ app.whenReady().then(() => {
 }
 
 # ---------------------------------------------------------------- --smoke
-Head '6. EyeRest 冒烟测试（--smoke，会自己退出）'
+Head '6. EyeRecess 冒烟测试（--smoke，会自己退出）'
 if (Test-Path $exe) {
   $r = Invoke-Exe -Exe $exe -Arguments @('.', '--smoke') -WorkingDir $proj -TimeoutSec 25
   if ($r.StillRunning) {
@@ -188,7 +188,7 @@ TryGet {
   $since = (Get-Date).AddMinutes(-30)
   $evts = Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = $since } -ErrorAction SilentlyContinue |
     Where-Object { $_.Id -in 1000, 1001, 1026 } |
-    Where-Object { $_.Message -match 'electron|EyeRest' } |
+    Where-Object { $_.Message -match 'electron|EyeRecess' } |
     Select-Object -First 4
   if (-not $evts) {
     Say '  最近 30 分钟没有相关崩溃记录（说明不是异常崩溃，而是干净地退出了）'

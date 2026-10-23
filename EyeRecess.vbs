@@ -1,4 +1,4 @@
-' EyeRest launcher: start the app with no console window.
+' EyeRecess launcher: start the app with no console window.
 ' Just double-click this file (or make a desktop shortcut to it).
 Option Explicit
 Dim fso, sh, base, cmd

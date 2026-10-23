@@ -1,8 +1,8 @@
 {
-  "name": "eyerest",
-  "productName": "EyeRest",
+  "name": "eyerecess",
+  "productName": "EyeRecess",
   "version": "0.1.0",
-  "description": "A tray/menu-bar eye-rest reminder that counts real screen time, not wall clock.",
+  "description": "A tray/menu-bar eye-rest reminder (课间) that counts real screen-on work time instead of wall clock.",
   "main": "src/main/main.js",
   "license": "MIT",
   "private": true,
@@ -17,7 +17,7 @@
     "test:logic": "node scripts/test-logic.js",
     "test:boot": "node scripts/test-boot.js",
     "fetch:electron": "node scripts/fetch-electron.mjs",
-    "app": "wscript EyeRest.vbs",
+    "app": "wscript EyeRecess.vbs",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win",
     "dist:linux": "electron-builder --linux",
@@ -27,16 +27,16 @@
     "electron": "^45.0.0",
     "electron-builder": "^26.15.3"
   },
-  "author": "EyeRest contributors",
-  "homepage": "https://github.com/ningninger/eyerest",
+  "author": "EyeRecess contributors",
+  "homepage": "https://github.com/ningninger/eyerecess",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ningninger/eyerest.git"
+    "url": "https://github.com/ningninger/eyerecess.git"
   },
   "build": {
-    "appId": "com.eyerest.app",
-    "productName": "EyeRest",
-    "copyright": "Copyright (c) 2026 EyeRest contributors",
+    "appId": "com.eyerecess.app",
+    "productName": "EyeRecess",
+    "copyright": "Copyright (c) 2026 EyeRecess contributors",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -76,7 +76,7 @@
       "darkModeSupport": true
     },
     "dmg": {
-      "title": "EyeRest ${version}",
+      "title": "EyeRecess ${version}",
       "window": {
         "width": 540,
         "height": 380
@@ -104,7 +104,7 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "EyeRest"
+      "shortcutName": "EyeRecess"
     },
     "linux": {
       "icon": "build/icon.png",

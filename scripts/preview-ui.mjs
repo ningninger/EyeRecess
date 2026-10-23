@@ -33,10 +33,10 @@ const state = {
   paused: false,
   pauseLeft: 0,
   app: {
-    name: 'EyeRest',
+    name: 'EyeRecess',
     version: '0.1.0',
     platform: 'darwin',
-    configDir: '~/Library/Application Support/EyeRest',
+    configDir: '~/Library/Application Support/EyeRecess',
     electron: '45.0.0',
   },
 };

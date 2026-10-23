@@ -81,6 +81,15 @@ h2 {
   letter-spacing: 0.02em;
 }
 
+/* 中文副名：跟在英文名后面，弱一档，不抢视线 */
+.brand h1 .cn {
+  margin-left: 8px;
+  color: #8b93a1;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+}
+
 .version {
   color: #5d6572;
   font-size: 11px;

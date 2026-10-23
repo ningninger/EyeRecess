@@ -88,7 +88,7 @@ section('配置 · 预设切换');
 
 section('配置 · 落盘读写');
 {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eyerest-test-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eyerecess-test-'));
   const store = new Store(dir);
   eq(store.config.micro.every, 600, '首次启动读默认值');
   store.patch({ micro: { every: 900 } });
@@ -251,7 +251,7 @@ section('计时器 · 进度换算');
 
 section('统计 · 按天聚合');
 {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eyerest-stats-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eyerecess-stats-'));
   const s = new Stats(dir);
   s.addActive(120);
   s.add('micro');

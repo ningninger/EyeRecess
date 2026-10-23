@@ -72,7 +72,7 @@ function Show-Tail {
 # D:\Workspace\tools 这类被沙箱改过 ACL 的目录里 —— Chromium 启动早期
 # 会对自己所在目录做一次访问，被那条 Everyone 继承拒绝项挡住，直接
 # CHECK 失败（退出码 -2147483645 / 0x80000003）。
-# 所以这里把 dist 复制一份到 %LOCALAPPDATA%\EyeRest\runtime 再跑。
+# 所以这里把 dist 复制一份到 %LOCALAPPDATA%\EyeRecess\runtime 再跑。
 function Get-ElectronExe {
   param([string]$Proj)
 
@@ -80,7 +80,7 @@ function Get-ElectronExe {
   $srcExe = Join-Path $srcDist 'electron.exe'
   if (-not (Test-Path $srcExe)) { return $null }
 
-  $runtimeDir = Join-Path $env:LOCALAPPDATA 'EyeRest\runtime'
+  $runtimeDir = Join-Path $env:LOCALAPPDATA 'EyeRecess\runtime'
   $runtimeExe = Join-Path $runtimeDir 'electron.exe'
 
   $needCopy = $true

@@ -165,8 +165,8 @@ function fakeEvent() {
 const appListeners = {};
 const app = {
   isPackaged: false,
-  name: 'EyeRest',
-  getName: () => 'EyeRest',
+  name: 'EyeRecess',
+  getName: () => 'EyeRecess',
   getVersion: () => '0.1.0',
   getPath: (n) => (n === 'userData' ? USER_DATA : path.join(ROOT, '.boot-test', n)),
   setPath: () => undefined,
@@ -315,8 +315,8 @@ function glows() {
 
 async function main() {
   resetUserData();
-  process.env.EYEREST_USER_DATA = USER_DATA;
-  process.env.EYEREST_LOG_DIR = path.join(USER_DATA, 'logs'); // 测试的日志别写到真实 APPDATA
+  process.env.EYERECESS_USER_DATA = USER_DATA;
+  process.env.EYERECESS_LOG_DIR = path.join(USER_DATA, 'logs'); // 测试的日志别写到真实 APPDATA
   delete process.env.ELECTRON_RUN_AS_NODE;
 
   // 让假事件带上一个已登记的窗口 id：安全层会校验 sender.id + 页面地址
@@ -328,11 +328,11 @@ async function main() {
 
   section('启动');
   ok(tray.created, '托盘已创建');
-  ok(String(tray.tooltip).startsWith('EyeRest'), '托盘提示文字带应用名');
+  ok(String(tray.tooltip).startsWith('EyeRecess'), '托盘提示文字带应用名');
   ok(String(tray.tooltip).includes('微休息'), '托盘提示文字带下次休息时间');
   eq(ipcHandle.has('app:get-state'), true, 'IPC app:get-state 已注册');
   const st = await ipcHandle.get('app:get-state')(fakeEvent());
-  eq(st.app.name, 'EyeRest', '设置页能拿到应用名');
+  eq(st.app.name, 'EyeRecess', '设置页能拿到应用名');
   eq(st.app.platform, process.platform, '平台字段');
   eq(typeof st.config.micro.every, 'number', '状态里带配置');
 

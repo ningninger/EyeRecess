@@ -1,4 +1,4 @@
-# EyeRest · 护眼休息提醒
+# EyeRecess（课间）· 护眼休息提醒
 
 一个常驻托盘 / 菜单栏的小工具。它只干一件事：**按你真正盯着屏幕干活的时间**，在合适的时候提醒你闭眼、起身、看远处。
 
@@ -31,7 +31,7 @@
 
 市面上多数软件按**墙钟**计时：45 分钟一到就弹窗，哪怕你中间去开了个会、摸鱼半小时。
 
-EyeRest 只在下面几条**同时成立**时才累计时间：
+EyeRecess 只在下面几条**同时成立**时才累计时间：
 
 1. **最近 60 秒内有键鼠输入**——看视频、发呆、离开工位、旁边站着思考，统统不算用眼；
 2. 不在休息中，也不在免打扰 / 暂停期间（这两段只计时、不打扰）。
@@ -50,9 +50,9 @@ EyeRest 只在下面几条**同时成立**时才累计时间：
 
 这个包没有苹果签名，第一次打开会被 Gatekeeper 拦：
 
-- 右键点 `EyeRest.app` → **打开** → 再点「打开」；
+- 右键点 `EyeRecess.app` → **打开** → 再点「打开」；
 - 或者「系统设置 → 隐私与安全性」里点「仍要打开」；
-- 如果提示「已损坏，无法打开」，在终端跑一次 `xattr -cr /Applications/EyeRest.app`（网上下载的文件带 quarantine 标记，Electron 的包没签名就会这样）。
+- 如果提示「已损坏，无法打开」，在终端跑一次 `xattr -cr /Applications/EyeRecess.app`（网上下载的文件带 quarantine 标记，Electron 的包没签名就会这样）。
 
 之后它会常驻**屏幕右上角的菜单栏**（蓝色圆环），不会弹任何窗口。
 
@@ -63,7 +63,7 @@ EyeRest 只在下面几条**同时成立**时才累计时间：
 需要先装 Node.js（≥ 18，推荐 20 以上）：<https://nodejs.org>
 
 ```bash
-cd eyerest
+cd eyerecess
 npm install     # 装 Electron，约 100 MB，第一次会比较久
 npm start
 ```
@@ -84,19 +84,19 @@ npm run demo    # 演示模式：微休息 8 秒一次、短休息 20 秒一次�
 
 ## 三·五、在 Windows 上跑起来
 
-**最省事的方式：从 GitHub Releases 下 `EyeRest Setup 0.1.0.exe`**（安装版，可以选安装目录）或者 `EyeRest-0.1.0-win.zip`（免安装，解压出 `EyeRest.exe` 双击就跑）。都不需要 Node.js。
+**最省事的方式：从 GitHub Releases 下 `EyeRecess Setup 0.1.0.exe`**（安装版，可以选安装目录）或者 `EyeRecess-0.1.0-win.zip`（免安装，解压出 `EyeRecess.exe` 双击就跑）。都不需要 Node.js。
 
 这个包同样没有代码签名，第一次运行 SmartScreen 会提示「未知发布者」→ 点「更多信息」→「仍要运行」。
 
 ### 从源码跑（开发态）
 
-**双击 `EyeRest.vbs` 就行**——没有任何黑窗口，图标直接进系统托盘。
+**双击 `EyeRecess.vbs` 就行**——没有任何黑窗口，图标直接进系统托盘。
 
-（`EyeRest.vbs` 会在后台调 `scripts\launch.ps1`，自己不出现在任务栏；如果启动失败，它会弹一个对话框告诉你日志在哪。）
+（`EyeRecess.vbs` 会在后台调 `scripts\launch.ps1`，自己不出现在任务栏；如果启动失败，它会弹一个对话框告诉你日志在哪。）
 
 它比 `npm start` 多做的事，都不是可选项：
 
-1. 先把 Electron 运行时复制一份到 `%LOCALAPPDATA%\EyeRest\runtime` 再启动（原因见下面「为什么不能直接 npm start」）；
+1. 先把 Electron 运行时复制一份到 `%LOCALAPPDATA%\EyeRecess\runtime` 再启动（原因见下面「为什么不能直接 npm start」）；
 2. 把这次运行的完整信息写进 `logs\` 目录；
 3. 盯着启动的头 25 秒：起来了就悄悄退出，没起来就弹框报错。
 
@@ -105,17 +105,17 @@ npm run demo    # 演示模式：微休息 8 秒一次、短休息 20 秒一次�
 从零开始的话：
 
 ```bat
-cd eyerest
+cd eyerecess
 npm install
-EyeRest.vbs
+EyeRecess.vbs
 ```
 
 注意事项：
 
 - 图标在**右下角系统托盘的折叠区**里（那个向上的小箭头 ^ 点开会看到蓝色圆环），不一定直接露在外面——可以把它拖到任务栏常显区。
-- 用 `EyeRest.vbs` 启动时**没有窗口**，程序在后台跑；要退出用托盘菜单里的「退出」。用 `run-windows.cmd` 启动时那个黑窗口得一直开着，关掉它程序也一起没了。
+- 用 `EyeRecess.vbs` 启动时**没有窗口**，程序在后台跑；要退出用托盘菜单里的「退出」。用 `run-windows.cmd` 启动时那个黑窗口得一直开着，关掉它程序也一起没了。
 - 窗口一直开着的时候说明程序正常在跑；如果它退出了，窗口会打印**退出码**、错误输出、以及日志尾部。
-- 所有日志都在项目里的 `logs\` 目录：`launch-*.log` 是每次启动的完整记录，`eyerest.log` 是程序自己的日志（启动到哪一步、有没有崩），`chromium-last.log` 是底层 Chromium 的日志。托盘菜单里还有一项「打开日志文件夹」。
+- 所有日志都在项目里的 `logs\` 目录：`launch-*.log` 是每次启动的完整记录，`eyerecess.log` 是程序自己的日志（启动到哪一步、有没有崩），`chromium-last.log` 是底层 Chromium 的日志。托盘菜单里还有一项「打开日志文件夹」。
 - 第一次启动会多花两三秒（要复制 150 MB 的运行时），之后就直接起来了。
 
 ### 为什么不能直接 `npm start`（在这台机器的工作区里）
@@ -143,7 +143,7 @@ EyeRest.vbs
 | 第 7 节进程还活着 | 其实起来了，只是图标被折叠区藏住了，或者被别的窗口盖住 |
 | 第 8 节有 `0xc0000005` | 原生层崩溃，把整段贴出来 |
 
-日志都在项目里的 `logs\` 目录（`eyerest.log` 是程序自己的日志，`launch-*.log` 是启动器的完整记录，`chromium-last.log` 是底层 Chromium 的）。没有 `EYEREST_LOG_DIR` 时才会落到 `%APPDATA%\EyeRest\logs\`。
+日志都在项目里的 `logs\` 目录（`eyerecess.log` 是程序自己的日志，`launch-*.log` 是启动器的完整记录，`chromium-last.log` 是底层 Chromium 的）。没有 `EYERECESS_LOG_DIR` 时才会落到 `%APPDATA%\EyeRecess\logs\`。
 
 常见退出码：
 
@@ -151,8 +151,8 @@ EyeRest.vbs
 | --- | --- | --- |
 | `0` | 自己退出了（不是崩溃） | 看日志最后几行，通常是单实例/配置问题 |
 | `2` | 被当成普通 Node 脚本跑了 | 清掉 `ELECTRON_RUN_AS_NODE` 环境变量 |
-| `3` | 已经有一个 EyeRest 在跑 | 任务管理器 → 详细信息 → 结束所有 electron.exe |
-| `-2147483645`（`0xC0000003`/`STATUS_BREAKPOINT`） | Chromium 原生初始化就崩了 | 运行时目录权限问题，确认它是从 `%LOCALAPPDATA%\EyeRest\runtime` 跑的，别从工作区里直接跑 |
+| `3` | 已经有一个 EyeRecess 在跑 | 任务管理器 → 详细信息 → 结束所有 electron.exe |
+| `-2147483645`（`0xC0000003`/`STATUS_BREAKPOINT`） | Chromium 原生初始化就崩了 | 运行时目录权限问题，确认它是从 `%LOCALAPPDATA%\EyeRecess\runtime` 跑的，别从工作区里直接跑 |
 | `-1073741819`（`0xC0000005`） | 原生内存访问冲突 | 杀毒软件/显卡驱动，把整段报告贴出来 |
 
 > **给改这些脚本的人**：`run-windows.cmd` / `diagnose.cmd` 必须是 **纯 ASCII + CRLF**（cmd.exe 按当前代码页逐字节解析批处理，混进中文或只有 LF 会让命令行被劈开，出现 `'ron.exe" .' 不是内部或外部命令` 这种莫名其妙的错误）；`scripts\*.ps1` 必须是 **UTF-8 with BOM + CRLF**（Windows PowerShell 5.1 才认得中文）。
@@ -193,9 +193,9 @@ npm run preview
 
 全部存在你自己机器的用户目录里，不上传任何东西：
 
-- macOS：`~/Library/Application Support/EyeRest/config.json`、`stats.json`
-- Windows：`%APPDATA%\EyeRest\`
-- Linux：`~/.config/EyeRest/`
+- macOS：`~/Library/Application Support/EyeRecess/config.json`、`stats.json`
+- Windows：`%APPDATA%\EyeRecess\`
+- Linux：`~/.config/EyeRecess/`
 
 `stats.json` 保留最近 120 天，只记录每天的有效用眼秒数、各种休息的次数，不记录窗口标题、不记录你在干什么。设置页可以把今日统计清零，也可以直接删文件。
 
