@@ -18,10 +18,10 @@
     "test:boot": "node scripts/test-boot.js",
     "fetch:electron": "node scripts/fetch-electron.mjs",
     "app": "wscript EyeRecess.vbs",
-    "dist:mac": "electron-builder --mac",
-    "dist:win": "electron-builder --win",
-    "dist:linux": "electron-builder --linux",
-    "dist": "electron-builder --mac --win --linux"
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:linux": "electron-builder --linux --publish never",
+    "dist": "electron-builder --mac --win --publish never"
   },
   "devDependencies": {
     "electron": "^45.0.0",
