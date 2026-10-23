@@ -46,7 +46,8 @@
       "assets/**/*",
       "docs/spec.md",
       "package.json",
-      "!**/*.map"
+      "!**/*.map",
+      "LICENSE"
     ],
     "asar": true,
     "mac": {
