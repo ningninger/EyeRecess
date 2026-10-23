@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>EyeRecess Overlay</title>
+    <link rel="stylesheet" href="overlay.css" />
+  </head>
+  <body>
+    <!-- Pointer-transparent micro reminder. -->
+    <div id="glow" class="glow" hidden>
+      <div class="glow-frame"></div>
+      <div class="glow-hint" id="glowHint"></div>
+    </div>
+
+    <!-- Guided short and long breaks. -->
+    <div id="brk" class="brk" hidden>
+      <div class="brk-inner">
+        <img class="overlay-mark" src="../../../assets/mark.svg" width="36" height="36" alt="" />
+        <div class="kicker" id="kicker"></div>
+
+        <div class="ring">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="track" cx="100" cy="100" r="88"></circle>
+            <circle class="prog" id="prog" cx="100" cy="100" r="88"></circle>
+          </svg>
+          <div class="time" id="time">0:00</div>
+        </div>
+
+        <h1 class="label" id="label">闭眼</h1>
+        <p class="sub" id="sub">什么都别看，就闭着</p>
+
+        <div class="blink" id="blink" hidden>
+          <div class="blink-circle" id="blinkCircle"><span id="blinkWord">闭眼</span></div>
+          <div class="blink-round" id="blinkRound">第 1 / 5 轮</div>
+        </div>
+
+        <div class="actions">
+          <button id="defer" class="ghost" hidden>延后 5 分钟</button>
+          <button id="end" class="ghost" hidden>提前结束</button>
+        </div>
+
+        <div class="foot" id="foot"></div>
+      </div>
+    </div>
+
+    <script src="overlay.js"></script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+* text=auto eol=lf
+
+# Windows entry points and PowerShell 5.1 scripts use CRLF.
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+*.vbs  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary inputs and release artifacts must not undergo text conversion.
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.icns binary
+*.zip  binary
+*.dmg  binary
+*.exe  binary
+*.app  binary

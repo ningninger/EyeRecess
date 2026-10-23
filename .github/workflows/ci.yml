@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Logic tests (timing model, config, stats, DND)
+        shell: bash
+        run: |
+          set +e
+          npm run test:logic > logic.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            grep -aE "FAIL|Failed|Error|error:|AssertionError" logic.log | head -20 | while IFS= read -r line; do
+              echo "::error::$(printf '%s' "$line" | tr -d '\r')"
+            done
+            tail -40 logic.log
+            exit $code
+          fi
+          tail -3 logic.log
+
+      - name: Main process tests (virtual activity)
+        shell: bash
+        run: |
+          set +e
+          npm run test:boot > boot.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            grep -aE "FAIL|Failed|Error|error:|AssertionError" boot.log | head -20 | while IFS= read -r line; do
+              echo "::error::$(printf '%s' "$line" | tr -d '\r')"
+            done
+            tail -60 boot.log
+            exit $code
+          fi
+          tail -3 boot.log
+
+      - name: Settings save tests (queued edits and retry)
+        run: npm run test:settings
+
+      - name: Source launcher and runtime setup tests
+        run: |
+          node tests/integration/start.test.js
+          node tests/integration/setup-electron.test.js
+
+      - name: Repository conventions and syntax
+        run: npm run check

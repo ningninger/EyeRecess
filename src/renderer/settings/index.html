@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>EyeRecess 课间</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-top">
+        <div class="brand">
+          <img class="brand-mark" src="../../../assets/mark.svg" width="40" height="40" alt="" />
+          <h1>EyeRecess<span class="cn">课间</span></h1>
+          <span class="version" id="version"></span>
+        </div>
+        <button id="quit" class="link">退出</button>
+      </div>
+
+      <div class="hero-message"><span class="dot" id="dot"></span><p>认真工作，也给眼睛一点课间。</p></div>
+
+      <div class="status" id="status">
+        <div class="stat">
+          <span class="stat-k">连续用眼</span>
+          <span class="stat-v" id="s-streak">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-k">下次微休息</span>
+          <span class="stat-v" id="s-micro">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-k">今日活跃时间</span>
+          <span class="stat-v" id="s-today">—</span>
+        </div>
+      </div>
+
+      <div class="bar" aria-hidden="true"><i id="bar-micro"></i></div>
+
+      <div class="quick">
+        <button class="primary" id="rest3">立即短休息</button>
+        <button class="ghost" id="rest10">长休息</button>
+        <button class="ghost" id="pauseBtn">暂停 30 分钟</button>
+      </div>
+      <p class="hint" id="dnd-hint"></p>
+    </header>
+
+    <main>
+      <section id="sec-plan">
+        <div class="section-heading">
+          <h2>按自己的节奏休息</h2>
+          <button class="link" id="resetPlan" type="button">恢复推荐方案</button>
+        </div>
+        <p class="intro">从推荐方案开始，让每一次休息都适合你。</p>
+        <div class="presets" id="presets"></div>
+        <p class="note" id="preset-hint" aria-live="polite"></p>
+        <p class="save-status" id="save-status" role="status" aria-live="polite">修改后自动保存，仅存于本机</p>
+        <button class="link" id="retrySave" type="button" hidden>重试保存</button>
+      </section>
+
+      <section id="sec-micro">
+        <div class="section-heading">
+          <h2>微休息 <span class="tag">片刻放松</span></h2>
+          <label class="check toggle"><input type="checkbox" id="micro-enabled" /> 开启提醒</label>
+        </div>
+        <p class="note" id="micro-summary"></p>
+        <p class="form-error" id="micro-error" role="status" hidden></p>
+        <fieldset id="micro-fields">
+          <legend class="sr-only">微休息设置</legend>
+          <div class="row">
+            <label for="micro-every">提醒间隔</label>
+            <input type="number" id="micro-every" min="1" max="120" step="1" required /><span class="unit">分钟</span>
+          </div>
+          <div class="row">
+            <label for="micro-len">轻提醒持续时间</label>
+            <input type="number" id="micro-len" min="10" max="300" step="1" required /><span class="unit">秒</span>
+          </div>
+          <details>
+            <summary>调整闭眼提醒与提示语</summary>
+            <div class="row">
+              <label for="micro-forceEvery">每几次提醒安排一次闭眼</label>
+              <input type="number" id="micro-forceEvery" min="1" max="10" step="1" required /><span class="unit">次</span>
+            </div>
+            <div class="row">
+              <label for="micro-forceLen">闭眼时长</label>
+              <input type="number" id="micro-forceLen" min="10" max="120" step="1" required /><span class="unit">秒</span>
+            </div>
+            <label class="message-label" for="micro-message">微休息提示语</label>
+            <textarea id="micro-message" maxlength="120" rows="2" placeholder="留空使用默认提示，例如：看一看窗外，让眼睛放松。"></textarea>
+            <p class="note">用于边缘光和闭眼提醒，最多 120 个字符。</p>
+          </details>
+        </fieldset>
+      </section>
+
+      <section id="sec-short">
+        <div class="section-heading">
+          <h2>短休息 <span class="tag">闭眼 · 眨眼 · 活动</span></h2>
+          <label class="check toggle"><input type="checkbox" id="short-enabled" /> 开启提醒</label>
+        </div>
+        <p class="note" id="short-summary"></p>
+        <p class="form-error" id="short-error" role="status" hidden></p>
+        <fieldset id="short-fields">
+          <legend class="sr-only">短休息设置</legend>
+          <div class="row">
+            <label for="short-every">提醒间隔</label>
+            <input type="number" id="short-every" min="5" max="360" step="1" required /><span class="unit">分钟</span>
+          </div>
+          <details>
+            <summary>调整休息内容与时长</summary>
+            <p class="note">按顺序进行，设为 0 秒可跳过某一步；至少保留一步。</p>
+            <div class="row">
+              <label for="short-eyes">闭眼</label>
+              <input type="number" id="short-eyes" min="0" max="600" step="1" required /><span class="unit">秒</span>
+            </div>
+            <div class="row">
+              <label for="short-blink">眨眼</label>
+              <input type="number" id="short-blink" min="0" max="180" step="1" required /><span class="unit">秒</span>
+            </div>
+            <div class="row">
+              <label for="short-stretch">起身 / 远眺</label>
+              <input type="number" id="short-stretch" min="0" max="600" step="1" required /><span class="unit">秒</span>
+            </div>
+            <p class="note" id="short-total"></p>
+            <label class="message-label" for="short-message">起身 / 远眺提示语</label>
+            <textarea id="short-message" maxlength="120" rows="2" placeholder="留空使用默认提示，例如：站起来伸个懒腰，看看远处。"></textarea>
+            <p class="note">在起身 / 远眺这一步显示，最多 120 个字符。</p>
+          </details>
+        </fieldset>
+      </section>
+
+      <section id="sec-long">
+        <div class="section-heading">
+          <h2>长休息 <span class="tag">离开屏幕</span></h2>
+          <label class="check toggle"><input type="checkbox" id="long-enabled" /> 开启提醒</label>
+        </div>
+        <p class="note" id="long-summary"></p>
+        <p class="form-error" id="long-error" role="status" hidden></p>
+        <fieldset id="long-fields">
+          <legend class="sr-only">长休息设置</legend>
+          <div class="row">
+            <label for="long-every">提醒间隔</label>
+            <input type="number" id="long-every" min="20" max="480" step="1" required /><span class="unit">分钟</span>
+          </div>
+          <div class="row">
+            <label for="long-len">休息时长</label>
+            <input type="number" id="long-len" min="2" max="30" step="1" required /><span class="unit">分钟</span>
+          </div>
+          <details>
+            <summary>调整闭眼时长与提示语</summary>
+            <div class="row">
+              <label for="long-eyes">开始时先闭眼</label>
+              <input type="number" id="long-eyes" min="0" max="600" step="1" required /><span class="unit">秒</span>
+            </div>
+            <p class="note">设为 0 秒可直接离开屏幕，至少留出 1 分钟活动时间。</p>
+            <label class="message-label" for="long-message">离开屏幕提示语</label>
+            <textarea id="long-message" maxlength="120" rows="2" placeholder="留空使用默认提示，例如：去接杯水，走动一下。"></textarea>
+          </details>
+        </fieldset>
+      </section>
+
+      <details class="advanced" id="advanced-settings">
+        <summary>更多设置 <span>免打扰、提醒方式与系统偏好</span></summary>
+      <section id="sec-dnd">
+        <h2>免打扰</h2>
+        <label class="check"><input type="checkbox" id="meetingDowngrade" /> 检测到会议软件在运行时，只发光、不遮屏</label>
+        <label class="check"><input type="checkbox" id="quietOn" /> 勿扰时段</label>
+        <div class="row inline" id="quietRow">
+          <input type="time" id="quietStart" aria-label="勿扰开始时间" required />
+          <span class="unit">到</span>
+          <input type="time" id="quietEnd" aria-label="勿扰结束时间" required />
+        </div>
+        <p class="note">勿扰期间继续记录活跃时间，但不会弹出提醒；恢复后会留出缓冲时间。</p>
+      </section>
+
+      <section id="sec-ui">
+        <h2>提醒方式</h2>
+        <label class="check"><input type="checkbox" id="ui-glow" /> 微休息用屏幕边缘呼吸光（最轻，不影响打字）</label>
+        <label class="check"><input type="checkbox" id="ui-sound" /> 微休息提醒与遮罩休息结束时响一声</label>
+      </section>
+
+      <section id="sec-system">
+        <h2>系统</h2>
+        <label class="check" id="row-launchAtLogin"><input type="checkbox" id="launchAtLogin" /> 登录后自动启动</label>
+        <p class="note" id="login-hint" hidden>自动启动适用于已安装的 macOS 和 Windows 应用；当前运行方式暂不支持。</p>
+        <label class="check" id="row-hideDock"><input type="checkbox" id="hideDock" /> 隐藏 Dock 图标，只留菜单栏（macOS）</label>
+        <label class="check"><input type="checkbox" id="shortcuts" /> 启用全局快捷键</label>
+        <div class="row">
+          <label for="multiMonitor">多显示器</label>
+          <select id="multiMonitor">
+            <option value="all">所有屏幕都遮</option>
+            <option value="cursor">只遮鼠标所在屏幕</option>
+          </select>
+        </div>
+        <p class="note">快捷键：<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd> 立刻休息 · <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> 暂停 / 恢复（macOS 上是 <kbd>⌘</kbd> 代替 <kbd>Ctrl</kbd>）</p>
+      </section>
+
+      </details>
+
+      <details class="secondary" id="sec-stats">
+        <summary>今天与最近 7 天</summary>
+        <h2>今天</h2>
+        <div class="stats-grid" id="statsGrid"></div>
+        <h2 class="sub2">最近 7 天</h2>
+        <div class="chart" id="chart"></div>
+      </details>
+
+      <details class="secondary" id="sec-about">
+        <summary>关于与数据管理</summary>
+        <h2>关于</h2>
+        <p class="note" id="about"></p>
+        <p class="note">
+          帮助建立定期休息的习惯。默认每 10 分钟微休息、每 50 分钟短休息，
+          也可选择 20-20-20 或自定节奏。研究结论受样本和场景限制，这些间隔不代表医学处方。
+        </p>
+        <div class="quick">
+          <button class="ghost" id="resetStats">清空今天的统计</button>
+        </div>
+      </details>
+    </main>
+
+    <script src="settings.js"></script>
+  </body>
+</html>

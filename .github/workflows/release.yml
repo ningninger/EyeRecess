@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-mac:
+    name: macOS
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - name: Build .dmg / .zip (arm64 + x64)
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          set +e
+          npm run dist:mac > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            grep -aiE "error|cannot|failed|invalid|⨯" build.log | head -20 | while IFS= read -r line; do
+              echo "::error::$(printf '%s' "$line" | tr -d '\r')"
+            done
+            tail -60 build.log
+            exit $code
+          fi
+          tail -20 build.log
+          ls -la dist || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          if-no-files-found: error
+          path: |
+            dist/*.dmg
+            dist/*.zip
+          retention-days: 7
+
+  build-win:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - name: Build installer + portable
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          set +e
+          npm run dist:win > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            grep -aiE "error|cannot|failed|invalid|⨯" build.log | head -20 | while IFS= read -r line; do
+              echo "::error::$(printf '%s' "$line" | tr -d '\r')"
+            done
+            tail -60 build.log
+            exit $code
+          fi
+          tail -20 build.log
+          ls -la dist || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: win
+          if-no-files-found: error
+          path: dist/*.exe
+          retention-days: 7
+
+  publish:
+    name: Publish release
+    needs: [build-mac, build-win]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Checksums
+        run: |
+          cd artifacts
+          find . -type f \( -name '*.dmg' -o -name '*.zip' -o -name '*.exe' \) -print0 \
+            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            EyeRecess ${{ github.ref_name }} helps you build a regular screen-break habit.
+
+            Download the DMG for your Mac architecture, or the Windows installer or portable executable.
+            Application downloads include the runtime; Node.js, npm, and a separate Electron installation are not required.
+            GitHub source archives require developer setup and are not ready-to-run application builds.
+            Current builds are unsigned and may trigger an operating system warning.
+            See the changelog for changes and the README for installation and limitations.
+          files: |
+            artifacts/**/*.dmg
+            artifacts/**/*.zip
+            artifacts/**/*.exe
+            artifacts/SHA256SUMS.txt

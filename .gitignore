@@ -1,0 +1,28 @@
+# Dependencies and local caches
+node_modules/
+.npm-cache/
+.npm-logs/
+.electron-cache/
+.eb-cache/
+
+# Private notes, generated previews, test data, and runtime output
+.local/
+.boot-test/
+.userdata/
+tmp-mini/
+logs/
+*.log
+run-log.txt
+chromium.log
+# Legacy diagnostic and preview output
+src/renderer/settings/_preview.html
+src/renderer/settings/_preview-api.js
+
+# Build output; build/ contains checked-in packaging inputs
+dist/
+build/*.icns
+build/*.ico
+
+# Operating system metadata
+.DS_Store
+Thumbs.db
