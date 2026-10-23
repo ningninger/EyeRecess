@@ -262,11 +262,25 @@ Module._load = function patched(request, parent, isMain) {
   return origLoad.apply(this, arguments);
 };
 
-// 进程扫描要走真的 tasklist/ps —— 换成立即返回的空结果，否则 2 小时要跑几百次
+// 进程扫描要走真的 tasklist/ps —— 换成立即返回的假结果，否则 2 小时要跑几百次。
+// 注意：各平台的输出格式不同，假数据必须跟平台对齐，否则测不到真实的解析逻辑：
+//   win32   tasklist /fo csv /nh  ->  "zoom.exe","1234","Console",...
+//   darwin  ps -Ao comm=          ->  /Applications/zoom.us.app/Contents/MacOS/zoom.us
+//   linux   ps -Ao comm=          ->  zoom
 const cp = require('child_process');
 cp.execFile = (file, args, opts, cb) => {
   const done = typeof opts === 'function' ? opts : cb;
-  const out = state.meeting ? '"zoom.exe","1234","Console","1","10,000 K"\n' : '';
+  let out = '';
+  if (state.meeting) {
+    if (process.platform === 'win32') {
+      out = '"zoom.exe","1234","Console","1","10,000 K"\n"explorer.exe","5678","Console","1","20,000 K"\n';
+    } else if (process.platform === 'darwin') {
+      // macOS 给的是完整路径，必须靠 basename 命中 'zoom.us'
+      out = '/Applications/zoom.us.app/Contents/MacOS/zoom.us\n/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder\n';
+    } else {
+      out = 'zoom\ncode\n';
+    }
+  }
   if (done) done(null, out, '');
   return { on() {}, kill() {} };
 };

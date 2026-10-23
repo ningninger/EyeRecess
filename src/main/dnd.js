@@ -59,7 +59,11 @@ function listProcesses(cb) {
       for (const line of stdout.split(/\r?\n/)) {
         const v = line.trim().toLowerCase();
         if (!v) continue;
+        // macOS 的 comm 是完整路径（/Applications/zoom.us.app/Contents/MacOS/zoom.us），
+        // Linux 是裸进程名（zoom）。两种都塞进去，basename 匹配才对。
         out.add(v);
+        const base = v.split('/').pop();
+        if (base) out.add(base);
       }
       cb(out);
     });

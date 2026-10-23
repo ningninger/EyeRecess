@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           # electron-builder 26 需要 npm 的 lockfileVersion 2/3，npm ci 会自动匹配
 
@@ -30,10 +30,36 @@ jobs:
         run: npm ci
 
       - name: Logic tests (timing model, config, stats, DND)
-        run: npm run test:logic
+        shell: bash
+        run: |
+          set +e
+          npm run test:logic > logic.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            # 把失败行变成 annotation：公开仓库的日志需要 token 才能下载，
+            # 但 annotation 是公开的，出问题不用登进来也能看到具体断言。
+            grep -aE "✗|失败|Error|error:|AssertionError" logic.log | head -20 | while IFS= read -r line; do
+              echo "::error::$(printf '%s' "$line" | tr -d '\r')"
+            done
+            tail -40 logic.log
+            exit $code
+          fi
+          tail -3 logic.log
 
       - name: Boot tests (fake electron + virtual clock, 4h of usage)
-        run: npm run test:boot
+        shell: bash
+        run: |
+          set +e
+          npm run test:boot > boot.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            grep -aE "✗|失败|Error|error:|AssertionError" boot.log | head -20 | while IFS= read -r line; do
+              echo "::error::$(printf '%s' "$line" | tr -d '\r')"
+            done
+            tail -60 boot.log
+            exit $code
+          fi
+          tail -3 boot.log
 
       - name: Syntax check every source file
         shell: bash
