@@ -54,7 +54,9 @@ EyeRest 只在下面几条**同时成立**时才累计时间：
 - 或者「系统设置 → 隐私与安全性」里点「仍要打开」；
 - 如果提示「已损坏，无法打开」，在终端跑一次 `xattr -cr /Applications/EyeRest.app`（网上下载的文件带 quarantine 标记，Electron 的包没签名就会这样）。
 
-之后它会常驻**屏幕右上角的菜单栏**（蓝色圆环），不会出现在 Dock 里，也不会弹任何窗口。
+之后它会常驻**屏幕右上角的菜单栏**（蓝色圆环），不会弹任何窗口。
+
+默认还会在 Dock 里留一个图标（方便你第一次找到它）。想变成纯菜单栏应用：菜单栏图标 → 设置… → 系统 → 勾上「隐藏 Dock 图标」，图标立刻就没了。
 
 ### 直接从源码跑
 
@@ -81,6 +83,12 @@ npm run demo    # 演示模式：微休息 8 秒一次、短休息 20 秒一次�
 一分钟内就能把三种休息、延后、强制闭眼全看一遍。
 
 ## 三·五、在 Windows 上跑起来
+
+**最省事的方式：从 GitHub Releases 下 `EyeRest Setup 0.1.0.exe`**（安装版，可以选安装目录）或者 `EyeRest-0.1.0-win.zip`（免安装，解压出 `EyeRest.exe` 双击就跑）。都不需要 Node.js。
+
+这个包同样没有代码签名，第一次运行 SmartScreen 会提示「未知发布者」→ 点「更多信息」→「仍要运行」。
+
+### 从源码跑（开发态）
 
 **双击 `EyeRest.vbs` 就行**——没有任何黑窗口，图标直接进系统托盘。
 
@@ -230,9 +238,21 @@ docs/spec.md   产品与研究依据（参数是怎么算出来的、引用了�
 
 `scripts/test-boot.js` 值得单独说一句：它用假的 `electron` 模块 + 虚拟时钟把主进程整个启动起来，快进 4 小时，断言 50 项——微休息是否在第 10 分钟出现、第 3 次是否强制闭眼、短休息延后 5 分钟后是否真的回来且不能再延、眨眼阶段能否提前结束、会议中是否只发光不遮屏、空闲 20 分钟是否完全不打扰、统计是否落盘。没有它，这个项目就只能靠肉眼验收。
 
-## 七、已知限制
+## 七、打包与发布
 
-- **没有打包成 .app / .exe**。开发期 `npm start` 就够用；要分发给别人或想双击启动，再补一个 `electron-builder` 配置即可（`npm i -D electron-builder` + 一个 `build` 段），这部分没做。
-- **macOS 首次运行**可能被 Gatekeeper 提示「未验证的开发者」，用 `npm start` 启动不受影响；打包后的 .app 需要签名才能免提示。
+已经配好 `electron-builder`，一条命令出包（**不能跨平台**，mac 包必须在 mac 上打）：
+
+```bash
+npm run dist:mac     # .dmg + .zip，arm64 与 x64
+npm run dist:win     # NSIS 安装包 + 免安装 zip
+npm run dist:linux   # AppImage
+```
+
+发版走 GitHub Actions：推一个 `v*` 的 tag，`.github/workflows/release.yml` 会在 macOS / Windows runner 上各自打包，汇总成 Release 草稿并附上 `SHA256SUMS.txt`。详细步骤（占位符怎么换、tag 怎么打、没签名会遇到什么）见 [docs/release.md](docs/release.md)。
+
+## 八、已知限制
+
+- **首次运行会被系统拦一下**：macOS 是 Gatekeeper（右键 → 打开，或 `xattr -cr`），Windows 是 SmartScreen（更多信息 → 仍要运行）。想彻底免掉要买签名证书，和个人项目不划算。
+- 在这台 Windows 开发机上 **NSIS 安装包打不出来**（工作区 ACL 拒绝 makensis 建临时文件），本地只能打 zip；CI 的干净 runner 上两种都正常。原因见 [docs/release.md](docs/release.md) 第 5 节。
 - 休息遮罩在全屏视频（如 QuickTime 全屏播放）之上能否盖住，取决于 macOS 版本和你是否开着「勿扰」；盖不住时会降级成菜单栏图标变色，不会静默失效。
 - 早起/开会等场景无法自动判断，只能靠「检测到会议软件就降级」+ 手动暂停。

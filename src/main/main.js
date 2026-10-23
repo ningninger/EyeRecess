@@ -654,6 +654,18 @@ function applyConfig() {
   overlay.setMultiMonitor(cfg.system.multiMonitor);
   registerShortcuts();
   syncLoginItem();
+  syncDock();
+}
+
+// macOS 上可以只留菜单栏；改了设置立刻生效，不用重启
+function syncDock() {
+  if (process.platform !== 'darwin' || !app.isReady() || !app.dock) return;
+  try {
+    if (cfg.system.hideDock) app.dock.hide();
+    else app.dock.show();
+  } catch (err) {
+    log.warn('切换 Dock 图标失败:', err && err.message);
+  }
 }
 
 function registerShortcuts() {
@@ -842,7 +854,6 @@ if (!gotLock) {
     if (process.platform === 'darwin' && cfg.system.hideDock) {
       app.dock?.hide();
     }
-
     const where = process.platform === 'darwin' ? '屏幕右上角的菜单栏' : '系统托盘';
     console.log(`[EyeRest] 已启动，图标在${where}（蓝色圆环）。左键点它看菜单。`);
     console.log('[EyeRest] 设置页、暂停、立即休息都在菜单里；要退出请用菜单里的「退出」。');

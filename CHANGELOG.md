@@ -31,12 +31,15 @@
 
 ### 工程
 
-- 跨平台：Windows / macOS / Linux，一套代码
-- 无 GUI 依赖的测试：100 项逻辑断言 + 50 项主进程联调（假 electron + 虚拟时钟快进 4 小时）
-- macOS 打包成 `.dmg`（arm64 + x64），Windows 出安装版和免安装单文件，Linux 出 AppImage
+- 跨平台：Windows / macOS / Linux，一套代码；快捷键在 mac 上自动是 `⌘⌥B` / `⌘⌥P`
+- 无 GUI 依赖的测试：100 项逻辑断言 + 50 项主进程联调（假 electron + 虚拟时钟快进 4 小时），CI 在三个系统上各跑一遍
+- `electron-builder` 打包：macOS 出 `.dmg` + `.zip`（arm64 / x64），Windows 出 NSIS 安装包 + 免安装 `.zip`，Linux 出 AppImage
+- 推 `v*` tag 触发 GitHub Actions 自动出全平台产物并生成 `SHA256SUMS.txt`
+- 源码树带 `.gitattributes`：`.cmd` / `.vbs` / `.ps1` 强制 CRLF，其余强制 LF，避免 Windows 上 clone 出来批处理跑不了
 
 ### 已知限制
 
 - 不能盖住全屏独占的应用（比如全屏播放的视频、全屏游戏）——遮罩会被系统忽略
 - 开会检测是「会议软件在运行」的近似判断，不是真的知道你有没有在开会
-- macOS / Windows 包都没有代码签名，首次打开需要手动放行
+- macOS / Windows 包都没有代码签名，首次打开需要手动放行（mac 右键打开或 `xattr -cr`，Windows SmartScreen「仍要运行」）
+- 在带 ACL 沙箱规则的工作区里，NSIS 安装包无法本地构建（只能用 zip 目标），CI 不受影响

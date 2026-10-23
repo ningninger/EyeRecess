@@ -13,6 +13,8 @@
 
 改完顺手把 `README.md` 里出现的仓库链接也换掉。
 
+改完提交一次：`git commit -am "chore: 填上仓库地址"`。
+
 ## 1. 本地确认一次
 
 ```bash
@@ -21,14 +23,19 @@ npm test          # 100 项逻辑 + 50 项主进程联调
 npx electron .    # 能不能正常出托盘、点开设置页
 ```
 
-## 2. 建仓库并推上去
+## 2. 建远程仓库并推上去
+
+这个目录**已经 `git init` 并提交好了**（`git log` 能看到 `EyeRest 0.1.0`），只差一个远程：
 
 ```bash
-git init
-git add .
-git commit -m "chore: initial commit"
-git branch -M main
-gh repo create eyerest --public --source=. --push   # 没装 gh 就去网页建空仓库，再 git remote add origin ... && git push -u origin main
+gh repo create eyerest --public --source=. --push   # 装了 gh 的话
+```
+
+没装 `gh` 就用网页版：在 GitHub 上新建一个**空**仓库（不要勾 README / .gitignore / license），然后
+
+```bash
+git remote add origin https://github.com/<你的用户名>/eyerest.git
+git push -u origin main
 ```
 
 第一次 push 之后，GitHub Actions 里的 **CI** 会自动在 Linux / Windows / macOS 三个系统上跑测试（`.github/workflows/ci.yml`）。三个都绿了再发版。
@@ -46,8 +53,8 @@ git push origin v0.1.0
 
 | 平台 | 产物 |
 | --- | --- |
-| macOS | `EyeRest-0.1.0-arm64.dmg` / `.zip`（Apple Silicon）、`EyeRest-0.1.0-x64.dmg` / `.zip`（Intel） |
-| Windows | `EyeRest Setup 0.1.0.exe`（安装版）、`EyeRest 0.1.0.exe`（免安装单文件） |
+| macOS | `EyeRest-0.1.0-arm64.dmg` / `-arm64.zip`（Apple Silicon）、`EyeRest-0.1.0-x64.dmg` / `-x64.zip`（Intel） |
+| Windows | `EyeRest Setup 0.1.0.exe`（安装版，可选安装目录）、`EyeRest-0.1.0-win.zip`（免安装，解压出 `EyeRest.exe` 直接跑） |
 | 附加 | `SHA256SUMS.txt` |
 
 整个过程大概 10–15 分钟：mac 两个架构各要下一份 Electron，Windows 还要下 NSIS 打包工具。
@@ -75,6 +82,18 @@ npm run dist:linux   # 只能在 Linux 上跑
 ```
 
 产物在 `dist/`。electron-builder **不能跨平台出包**（mac 包必须在 mac 上构建，Windows 同理），这也是为什么用 GitHub Actions 的 macOS 和 Windows runner，而不是在本地硬造。
+
+### 在这台 Windows 机器上的已知限制
+
+- **NSIS 安装包在本机打不出来**：`Error in script "<stdin>" on line 117` / `!tempfile: Unable to create temporary file!`。原因是工作区目录带着 DSH 沙箱的继承拒绝项（`(D;CI;DT;;;WD)`），makensis 建临时文件被拒。**跟配置无关**，GitHub Actions 的干净 runner 上正常。
+- 本机能打的是 zip 目标，已经实测过：
+
+  ```bash
+  npx electron-builder --win zip --x64
+  # → dist\EyeRest-0.1.0-win.zip（146 MB）
+  ```
+
+  解压出来 `win-unpacked\EyeRest.exe` 可以直接双击运行，asar 打包、图标、托盘、安全策略都验证过没问题。
 
 ## 6. 版本号怎么往下走
 

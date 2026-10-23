@@ -14,6 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      # 测试用的是假 electron，不需要真的下载 100MB 运行时
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -21,6 +24,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          # electron-builder 26 需要 npm 的 lockfileVersion 2/3，npm ci 会自动匹配
 
       - name: Install
         run: npm ci

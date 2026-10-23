@@ -85,6 +85,7 @@ function renderConfig(cfg) {
   setChk('ui-sound', cfg.ui.sound);
 
   setChk('launchAtLogin', cfg.system.launchAtLogin);
+  setChk('hideDock', cfg.system.hideDock);
   setChk('shortcuts', cfg.system.shortcuts);
   setVal('multiMonitor', cfg.system.multiMonitor);
 
@@ -140,6 +141,7 @@ function collect() {
     ui: { glow: chk('ui-glow'), sound: chk('ui-sound') },
     system: {
       launchAtLogin: chk('launchAtLogin'),
+      hideDock: chk('hideDock'),
       shortcuts: chk('shortcuts'),
       multiMonitor: val('multiMonitor'),
     },
@@ -232,6 +234,9 @@ function applyState(s, opts = {}) {
   renderPresets(s);
   renderStatus(s);
   renderStats(s);
+  // 「隐藏 Dock 图标」只在 macOS 上有意义
+  const dockRow = $('row-hideDock');
+  if (dockRow) dockRow.style.display = s.app.platform === 'darwin' ? '' : 'none';
   $('version').textContent = 'v' + s.app.version;
   $('about').textContent = `EyeRest ${s.app.version} · Electron ${s.app.electron} · ${s.app.platform}\n配置与统计保存在：${s.app.configDir}`;
 }
@@ -255,7 +260,7 @@ const INPUTS = [
   'multiMonitor',
 ];
 
-const CHECKS = ['meetingDowngrade', 'quietOn', 'ui-glow', 'ui-sound', 'launchAtLogin', 'shortcuts'];
+const CHECKS = ['meetingDowngrade', 'quietOn', 'ui-glow', 'ui-sound', 'launchAtLogin', 'hideDock', 'shortcuts'];
 
 for (const id of [...INPUTS, ...CHECKS]) {
   const el = $(id);
