@@ -92,7 +92,7 @@
           ]
         },
         {
-          "target": "zip",
+          "target": "portable",
           "arch": [
             "x64"
           ]
