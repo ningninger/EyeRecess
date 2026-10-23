@@ -1,0 +1,116 @@
+{
+  "name": "eyerest",
+  "productName": "EyeRest",
+  "version": "0.1.0",
+  "description": "A tray/menu-bar eye-rest reminder that counts real screen time, not wall clock.",
+  "main": "src/main/main.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/launch.ps1",
+    "demo": "electron . --fast",
+    "smoke": "electron . --smoke",
+    "icons": "node scripts/gen-icons.mjs",
+    "preview": "node scripts/preview-ui.mjs",
+    "test": "node scripts/test-logic.js && node scripts/test-boot.js",
+    "test:logic": "node scripts/test-logic.js",
+    "test:boot": "node scripts/test-boot.js",
+    "fetch:electron": "node scripts/fetch-electron.mjs",
+    "app": "wscript EyeRest.vbs",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "dist": "electron-builder --mac --win --linux"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "author": "EyeRest contributors",
+  "homepage": "https://github.com/CHANGE_ME/eyerest",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CHANGE_ME/eyerest.git"
+  },
+  "build": {
+    "appId": "com.eyerest.app",
+    "productName": "EyeRest",
+    "copyright": "Copyright (c) 2026 EyeRest contributors",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "docs/spec.md",
+      "package.json",
+      "!**/*.map"
+    ],
+    "asar": true,
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "darkModeSupport": true
+    },
+    "dmg": {
+      "title": "EyeRest ${version}",
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "EyeRest"
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
+    }
+  }
+}

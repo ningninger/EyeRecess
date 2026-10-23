@@ -1,0 +1,127 @@
+name: Release
+
+# 打一个 v0.1.0 这样的 tag 就会自动构建并发布：
+#   git tag v0.1.0 && git push origin v0.1.0
+#
+# 产物：
+#   macOS  EyeRest-<ver>-arm64.dmg / .zip（Apple Silicon）
+#          EyeRest-<ver>-x64.dmg   / .zip（Intel）
+#   Windows EyeRest Setup <ver>.exe（安装版）、EyeRest <ver>.exe（免安装单文件）
+#   Linux   EyeRest-<ver>.AppImage
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-mac:
+    name: macOS
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test:logic
+      - name: Build .dmg / .zip (arm64 + x64)
+        run: npm run dist:mac
+        env:
+          # 没有签名证书时不要去找，否则构建会报错
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          if-no-files-found: error
+          path: |
+            dist/*.dmg
+            dist/*.zip
+
+  build-win:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test:logic
+      - name: Build installer + portable
+        run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: win
+          if-no-files-found: error
+          path: dist/*.exe
+
+  build-linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build AppImage
+        run: npm run dist:linux
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          if-no-files-found: ignore
+          path: dist/*.AppImage
+
+  publish:
+    name: Publish release
+    needs: [build-mac, build-win]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Checksums
+        run: |
+          cd artifacts
+          find . -type f \( -name '*.dmg' -o -name '*.zip' -o -name '*.exe' -o -name '*.AppImage' \) -print0 \
+            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          # 首个版本先标 prerelease（还没在真机上长期跑过），确认稳定后手动取消
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            EyeRest ${{ github.ref_name }} —— 有证据支持的护眼休息提醒。
+
+            ## 安装
+            - **macOS**：下载对应的 `.dmg`（Apple Silicon 选 `arm64`，Intel 选 `x64`），拖进「应用程序」。
+              这个包**没有签名**，第一次打开请**右键 → 打开**（或到「系统设置 → 隐私与安全性」点「仍要打开」）。
+              如果提示「已损坏」，在终端执行：`xattr -cr /Applications/EyeRest.app`
+            - **Windows**：`EyeRest Setup <ver>.exe` 是安装版，`EyeRest <ver>.exe` 是免安装单文件。
+              没有代码签名，SmartScreen 可能提示「未知发布者」→「更多信息」→「仍要运行」。
+
+            ## 这一版能做什么
+            - 按「真正在干活的时间」计时：只有最近 60 秒有键鼠输入、不在休息/免打扰中才累计
+            - 三级休息：微休息（闭眼/远眺）、短休息（闭眼 90s + 眨眼训练）、长休息
+            - 开会自动降级：检测到会议软件只发光、不遮屏
+            - 完全离线：不联网、不申请摄像头麦克风定位、不记录你在干什么
+
+            详见仓库里的 README。
+          files: |
+            artifacts/**/*.dmg
+            artifacts/**/*.zip
+            artifacts/**/*.exe
+            artifacts/**/*.AppImage
+            artifacts/SHA256SUMS.txt

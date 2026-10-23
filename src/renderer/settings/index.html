@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>EyeRest</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-top">
+        <div class="brand">
+          <span class="dot" id="dot"></span>
+          <h1>EyeRest</h1>
+          <span class="version" id="version"></span>
+        </div>
+        <button id="quit" class="link">退出</button>
+      </div>
+
+      <div class="status" id="status">
+        <div class="stat">
+          <span class="stat-k">连续用眼</span>
+          <span class="stat-v" id="s-streak">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-k">下次微休息</span>
+          <span class="stat-v" id="s-micro">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-k">今日有效用眼</span>
+          <span class="stat-v" id="s-today">—</span>
+        </div>
+      </div>
+
+      <div class="bar" aria-hidden="true"><i id="bar-micro"></i></div>
+
+      <div class="quick">
+        <button class="primary" id="rest3">现在休息 3 分钟</button>
+        <button class="ghost" id="rest10">长休息</button>
+        <button class="ghost" id="pauseBtn">暂停 30 分钟</button>
+      </div>
+      <p class="hint" id="dnd-hint"></p>
+    </header>
+
+    <main>
+      <section id="sec-plan">
+        <h2>休息方案</h2>
+        <div class="presets" id="presets"></div>
+        <p class="note" id="preset-hint"></p>
+      </section>
+
+      <section id="sec-micro">
+        <h2>微休息 <span class="tag">不打断</span></h2>
+        <div class="row">
+          <label>每累计用眼</label>
+          <input type="number" id="micro-every" min="1" max="120" step="1" /><span class="unit">分钟</span>
+        </div>
+        <div class="row">
+          <label>休息时长</label>
+          <input type="number" id="micro-len" min="10" max="300" step="5" /><span class="unit">秒</span>
+        </div>
+        <div class="row">
+          <label>每 <input type="number" id="micro-forceEvery" min="1" max="10" step="1" class="tiny" /> 次里，强制闭眼一次</label>
+          <input type="number" id="micro-forceLen" min="10" max="120" step="5" /><span class="unit">秒</span>
+        </div>
+      </section>
+
+      <section id="sec-short">
+        <h2>短休息 <span class="tag warn">会遮屏</span></h2>
+        <div class="row">
+          <label>每累计用眼</label>
+          <input type="number" id="short-every" min="5" max="360" step="1" /><span class="unit">分钟</span>
+        </div>
+        <div class="row">
+          <label>闭眼</label>
+          <input type="number" id="short-eyes" min="0" max="600" step="5" /><span class="unit">秒</span>
+        </div>
+        <div class="row">
+          <label>眨眼训练</label>
+          <input type="number" id="short-blink" min="0" max="180" step="6" /><span class="unit">秒</span>
+        </div>
+        <div class="row">
+          <label>起身 / 远眺</label>
+          <input type="number" id="short-stretch" min="0" max="600" step="5" /><span class="unit">秒</span>
+        </div>
+        <p class="note" id="short-total"></p>
+      </section>
+
+      <section id="sec-long">
+        <h2>长休息 <span class="tag warn">强遮罩</span></h2>
+        <div class="row">
+          <label>每累计用眼</label>
+          <input type="number" id="long-every" min="20" max="480" step="5" /><span class="unit">分钟</span>
+        </div>
+        <div class="row">
+          <label>总时长</label>
+          <input type="number" id="long-len" min="2" max="30" step="1" /><span class="unit">分钟</span>
+        </div>
+        <div class="row">
+          <label>其中闭眼</label>
+          <input type="number" id="long-eyes" min="0" max="600" step="10" /><span class="unit">秒</span>
+        </div>
+      </section>
+
+      <section id="sec-dnd">
+        <h2>免打扰</h2>
+        <label class="check"><input type="checkbox" id="meetingDowngrade" /> 检测到会议软件在运行时，只发光、不遮屏</label>
+        <label class="check"><input type="checkbox" id="quietOn" /> 勿扰时段</label>
+        <div class="row inline" id="quietRow">
+          <input type="time" id="quietStart" />
+          <span class="unit">到</span>
+          <input type="time" id="quietEnd" />
+        </div>
+        <p class="note">勿扰期间照样计时（眼睛不会因为开会就不累），只是不提醒；结束后不会补一个迟到的弹窗，而是留 3 分钟缓冲。</p>
+      </section>
+
+      <section id="sec-ui">
+        <h2>提醒方式</h2>
+        <label class="check"><input type="checkbox" id="ui-glow" /> 微休息用屏幕边缘呼吸光（最轻，不影响打字）</label>
+        <label class="check"><input type="checkbox" id="ui-sound" /> 休息结束时响一声</label>
+      </section>
+
+      <section id="sec-system">
+        <h2>系统</h2>
+        <label class="check"><input type="checkbox" id="launchAtLogin" /> 开机自动启动</label>
+        <label class="check"><input type="checkbox" id="shortcuts" /> 启用全局快捷键</label>
+        <div class="row">
+          <label>多显示器</label>
+          <select id="multiMonitor">
+            <option value="all">所有屏幕都遮</option>
+            <option value="cursor">只遮鼠标所在屏幕</option>
+          </select>
+        </div>
+        <p class="note">快捷键：<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd> 立刻休息 · <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> 暂停 / 恢复</p>
+      </section>
+
+      <section id="sec-stats">
+        <h2>今天</h2>
+        <div class="stats-grid" id="statsGrid"></div>
+        <h2 class="sub2">最近 7 天</h2>
+        <div class="chart" id="chart"></div>
+      </section>
+
+      <section id="sec-about">
+        <h2>关于</h2>
+        <p class="note" id="about"></p>
+        <p class="note">
+          依据：20-20-20 法则的高质量证据并不支持它（Johnson 2023；Redondo-Jiménez 2025），
+          所以默认按「每 10 分钟微休息 + 每 50 分钟短休息」走，20-20-20 作为保守预设保留。
+        </p>
+        <div class="quick">
+          <button class="ghost" id="resetStats">清空今天的统计</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="settings.js"></script>
+  </body>
+</html>

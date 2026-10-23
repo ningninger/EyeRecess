@@ -1,0 +1,309 @@
+:root {
+  --accent: #4c8dff;
+  --warm: #f5a623;
+  --fg: #e9ecf1;
+  --fg-dim: #8b93a1;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+    'Noto Sans CJK SC', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: var(--font);
+  color: var(--fg);
+  user-select: none;
+  cursor: default;
+}
+
+body.veil {
+  background: #000;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ------------------------------ 微休息：呼吸光 ----------------------------- */
+.glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.glow-frame {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.glow-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 110px 10px rgba(76, 141, 255, 0.55);
+  border-radius: 18px;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+.glow-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(120, 175, 255, 0.55);
+  border-radius: 18px;
+  animation: glowEdge 4s ease-in-out infinite;
+}
+
+.glow.play .glow-frame {
+  animation: glowIn 0.5s ease-out forwards;
+}
+
+@keyframes glowIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes glowEdge {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.glow-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  transform: translateX(-50%);
+  padding: 12px 26px;
+  border-radius: 999px;
+  background: rgba(16, 20, 28, 0.78);
+  border: 1px solid rgba(120, 175, 255, 0.35);
+  color: #dfe8ff;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+  animation: hintIn 0.6s ease-out;
+}
+
+@keyframes hintIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* -------------------------------- 休息遮罩 -------------------------------- */
+.brk {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0b0d;
+  animation: fadeIn 0.35s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.brk-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 32px;
+  text-align: center;
+  max-width: 620px;
+}
+
+.kicker {
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+}
+
+.ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 6px 0 2px;
+}
+
+.ring svg {
+  width: 200px;
+  height: 200px;
+  transform: rotate(-90deg);
+}
+
+.ring .track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 8;
+}
+
+.ring .prog {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 552.92;
+  stroke-dashoffset: 0;
+}
+
+.ring .time {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.label {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.sub {
+  margin: 0;
+  font-size: 16px;
+  color: var(--fg-dim);
+  line-height: 1.6;
+}
+
+/* 眨眼训练 */
+.blink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.blink-circle {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  color: #0a0b0d;
+  background: radial-gradient(circle at 35% 30%, #9ec2ff, var(--accent));
+  transition:
+    transform 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.55s ease;
+  transform: scale(1);
+}
+
+.blink-circle.small {
+  transform: scale(0.62);
+}
+
+.blink-circle.tight {
+  transform: scale(0.42);
+}
+
+.blink-round {
+  font-size: 14px;
+  color: var(--fg-dim);
+  letter-spacing: 0.08em;
+}
+
+/* 按钮 */
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  min-height: 44px;
+  align-items: center;
+}
+
+button.ghost {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fg-dim);
+  padding: 11px 22px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+button.ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--fg);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+button.ghost:active {
+  transform: translateY(1px);
+}
+
+.foot {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #5c6472;
+  letter-spacing: 0.06em;
+  min-height: 16px;
+}
+
+/* 多屏副屏：只铺黑，不显示任何 UI */
+body.veil .brk,
+body.veil .glow {
+  background: #000;
+}
+
+body.veil .brk-inner {
+  display: none;
+}

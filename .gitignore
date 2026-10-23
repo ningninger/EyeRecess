@@ -1,0 +1,30 @@
+# 依赖与构建产物
+node_modules/
+
+# 本机缓存（Windows 上装依赖时被沙箱逼进来的，不要进仓库）
+.npm-cache/
+.npm-logs/
+.electron-cache/
+
+# 测试与调试产物
+.boot-test/
+.userdata/
+tmp-mini/
+*.log
+# 界面预览（npm run preview 生成，随时可丢）
+src/renderer/settings/_preview.html
+# 运行/诊断产生的文件
+run-log.txt
+chromium.log
+诊断报告.txt
+
+# 系统
+.DS_Store
+Thumbs.db
+# 运行日志（launch-*.log / eyerest.log / chromium-last.log）
+logs/
+# 打包产物
+dist/
+.eb-cache/
+build/*.icns
+build/*.ico

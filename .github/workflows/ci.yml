@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Logic tests (timing model, config, stats, DND)
+        run: npm run test:logic
+
+      - name: Boot tests (fake electron + virtual clock, 4h of usage)
+        run: npm run test:boot
+
+      - name: Syntax check every source file
+        shell: bash
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            node --check "$f" || fail=1
+          done < <(find src scripts -type f \( -name '*.js' -o -name '*.mjs' -o -name '*.cjs' \))
+          exit $fail
