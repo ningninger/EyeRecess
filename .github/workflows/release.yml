@@ -7,7 +7,6 @@ name: Release
 #   macOS  EyeRecess-<ver>-arm64.dmg / .zip（Apple Silicon）
 #          EyeRecess-<ver>-x64.dmg   / .zip（Intel）
 #   Windows EyeRecess Setup <ver>.exe（安装版）、EyeRecess <ver>.exe（免安装单文件）
-#   Linux   EyeRecess-<ver>.AppImage
 on:
   push:
     tags: ['v*']
@@ -29,10 +28,24 @@ jobs:
       - run: npm ci
       - run: npm run test:logic
       - name: Build .dmg / .zip (arm64 + x64)
-        run: npm run dist:mac
+        shell: bash
         env:
           # 没有签名证书时不要去找，否则构建会报错
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          set +e
+          npm run dist:mac > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            # 公开仓库的完整日志要 token 才能下载，annotation 是公开的
+            grep -aiE "error|cannot|failed|invalid|⨯" build.log | head -20 | while IFS= read -r line; do
+              echo "::error::$(printf '%s' "$line" | tr -d '\r')"
+            done
+            tail -60 build.log
+            exit $code
+          fi
+          tail -20 build.log
+          ls -la dist || true
       - uses: actions/upload-artifact@v4
         with:
           name: mac
@@ -40,6 +53,7 @@ jobs:
           path: |
             dist/*.dmg
             dist/*.zip
+          retention-days: 7
 
   build-win:
     name: Windows
@@ -53,14 +67,28 @@ jobs:
       - run: npm ci
       - run: npm run test:logic
       - name: Build installer + portable
-        run: npm run dist:win
+        shell: bash
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          set +e
+          npm run dist:win > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            grep -aiE "error|cannot|failed|invalid|⨯" build.log | head -20 | while IFS= read -r line; do
+              echo "::error::$(printf '%s' "$line" | tr -d '\r')"
+            done
+            tail -60 build.log
+            exit $code
+          fi
+          tail -20 build.log
+          ls -la dist || true
       - uses: actions/upload-artifact@v4
         with:
           name: win
           if-no-files-found: error
           path: dist/*.exe
+          retention-days: 7
 
   publish:
     name: Publish release
@@ -74,7 +102,7 @@ jobs:
       - name: Checksums
         run: |
           cd artifacts
-          find . -type f \( -name '*.dmg' -o -name '*.zip' -o -name '*.exe' -o -name '*.AppImage' \) -print0 \
+          find . -type f \( -name '*.dmg' -o -name '*.zip' -o -name '*.exe' \) -print0 \
             | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
@@ -104,5 +132,4 @@ jobs:
             artifacts/**/*.dmg
             artifacts/**/*.zip
             artifacts/**/*.exe
-            artifacts/**/*.AppImage
             artifacts/SHA256SUMS.txt
