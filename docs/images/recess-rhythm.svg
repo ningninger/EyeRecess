@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="300" viewBox="0 0 960 300" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">A little space between tasks</title>
+  <desc id="description">Three illustrated moments: work, pause, and return. A winding green line connects a desktop, a resting eye, and a growing plant.</desc>
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#174c3f" opacity=".07"/>
+    </pattern>
+    <linearGradient id="pause" x1="398" y1="70" x2="562" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#205c4b"/>
+      <stop offset="1" stop-color="#123a31"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="300" rx="24" fill="#f3f5ed"/>
+  <rect width="960" height="300" rx="24" fill="url(#dots)"/>
+  <path d="M170 170C282 170 280 108 393 130M567 153C680 130 660 196 780 170" stroke="#bdd7bf" stroke-width="2" stroke-dasharray="5 7" stroke-linecap="round"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" text-anchor="middle">
+    <text x="480" y="38" fill="#536c5f" font-size="11" font-weight="600" letter-spacing="3">A LITTLE SPACE BETWEEN TASKS</text>
+    <g transform="translate(120 89)">
+      <rect x="10" y="4" width="132" height="88" rx="10" fill="#fffef9" stroke="#8fae9a" stroke-width="2"/>
+      <path d="M10 25H142" stroke="#d7e2d3" stroke-width="2"/>
+      <circle cx="23" cy="15" r="2.5" fill="#8fae9a"/>
+      <circle cx="32" cy="15" r="2.5" fill="#bdd7bf"/>
+      <circle cx="41" cy="15" r="2.5" fill="#d7e2d3"/>
+      <path d="M29 43H79M29 55H115M29 67H97" stroke="#b5cbb7" stroke-width="4" stroke-linecap="round"/>
+      <path d="M76 93V109M52 110H100" stroke="#8fae9a" stroke-width="3" stroke-linecap="round"/>
+      <rect x="1" y="118" width="150" height="5" rx="2.5" fill="#d7e2d3"/>
+    </g>
+    <circle cx="480" cy="147" r="89" fill="#dce9d8"/>
+    <rect x="405" y="72" width="150" height="150" rx="38" fill="url(#pause)"/>
+    <path d="M432 149Q480 92 528 149Q480 206 432 149Z" stroke="#c3edd0" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M471 139V159M489 139V159" stroke="#c3edd0" stroke-width="6" stroke-linecap="round"/>
+    <g transform="translate(718 84)">
+      <path d="M50 94V33M50 73C23 73 11 57 15 42C37 39 50 54 50 73ZM50 51C50 26 63 12 85 15C89 34 74 49 50 51Z" fill="#a6c6a5"/>
+      <path d="M50 94V36" stroke="#537e60" stroke-width="3" stroke-linecap="round"/>
+      <path d="M27 94H74L68 125H33L27 94Z" fill="#d6bba0"/>
+      <rect x="23" y="88" width="55" height="10" rx="4" fill="#e2ccb5"/>
+      <path d="M5 126H96" stroke="#d7e2d3" stroke-width="4" stroke-linecap="round"/>
+      <path d="M100 50H110M105 45V55" stroke="#8fae9a" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <text x="196" y="252" fill="#174c3f" font-size="16" font-weight="600" letter-spacing="2">WORK</text>
+    <text x="480" y="252" fill="#174c3f" font-size="16" font-weight="600" letter-spacing="2">PAUSE</text>
+    <text x="768" y="252" fill="#174c3f" font-size="16" font-weight="600" letter-spacing="2">RETURN</text>
+    <text x="196" y="276" fill="#536c5f" font-size="12">Find your flow.</text>
+    <text x="480" y="276" fill="#536c5f" font-size="12">Take a little recess.</text>
+    <text x="768" y="276" fill="#536c5f" font-size="12">Room for the next thing.</text>
+  </g>
+</svg>

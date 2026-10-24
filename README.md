@@ -1,59 +1,109 @@
-# EyeRecess
+<p align="center">
+  <img src="assets/icon-512.png" width="112" height="112" alt="EyeRecess — an eye with a pause symbol" />
+</p>
 
-A tray and menu bar app that helps you take regular screen breaks. It estimates active computer use and offers gentle reminders, guided short breaks, and longer time away from the screen.
+<h1 align="center">EyeRecess</h1>
 
-[Chinese introduction](README.zh-CN.md)
+<p align="center">
+  <strong>A little recess for your eyes.</strong><br />
+  Gentle screen breaks, right from your menu bar or tray.
+</p>
 
-## Install
+<p align="center">
+  <a href="https://github.com/ningninger/eyerecess/releases"><strong>Download</strong></a> ·
+  <a href="#your-first-recess">Get started</a> ·
+  <a href="README.zh-CN.md">Chinese</a> ·
+  <a href="docs/support.md">Support</a>
+</p>
 
-Download a build from [Releases](https://github.com/ningninger/eyerecess/releases):
+<p align="center">
+  No account. Local settings. A rhythm you can make your own.
+</p>
 
-- **macOS:** choose the DMG for Apple Silicon (`arm64`) or Intel (`x64`).
-- **Windows:** choose the installer or portable executable.
-- **Linux:** run from source or build an AppImage locally.
+<p align="center">
+  <img src="docs/images/recess-rhythm.svg" width="960" alt="Work, pause, return: a small screen break makes room for the next thing." />
+</p>
 
-Current builds are unsigned and may trigger an operating system warning. After launch, open Settings from the tray or menu bar icon. Closing Settings leaves the app running; use Quit to exit.
+## Small breaks. Room for your day.
 
-Installers and portable builds bundle the Electron runtime. End users do not need to install Node.js, npm, or Electron. GitHub source archives are developer checkouts and are not ready-to-run applications.
+Start with the recommended plan, then adjust it to fit your routine. EyeRecess estimates active computer use and gives you three ways to step back.
 
-## Features
+| 🌱 A moment | 🌿 A reset | 🌳 A proper recess |
+| :--- | :--- | :--- |
+| **Micro break · every 10 min** | **Short break · every 50 min** | **Long break · every 2 hr** |
+| A soft edge glow, with occasional guided eye closure. | Close your eyes, blink, and take a moment to move. | Leave the screen behind. Stretch, walk, or get some water. |
 
-- Micro, short, and long breaks with configurable schedules.
-- Simple reminder controls, optional custom guidance, and a recommended-plan reset.
-- Guided eye closure, blinking, and movement breaks.
-- Quiet hours, pause controls, and meeting-aware reminders.
-- Local settings and daily usage summaries, with no account or cloud sync.
+*These are the default intervals, based on estimated active time. Each reminder can be adjusted or switched off.*
 
-Activity and meeting detection are approximate. Passive reading may be treated as idle time, and a running meeting app may reduce reminders even outside a call. This app supports healthy habits; it does not diagnose or treat medical conditions.
+### Make it yours
 
-## Development
+- **Start simple.** Choose a preset or keep the recommended plan.
+- **Add your own nudge.** Customize timings, break steps, and reminder text.
+- **Leave room for focus.** Pause reminders, set quiet hours, or use lighter reminders when meeting software is running.
+- **Keep it local.** Settings and daily summaries stay on your computer, with no account or cloud sync.
 
-Requires Node.js 22.12.0 or later and npm.
+## Your first recess
 
-Run `npm ci` before starting a source checkout. It installs the locked development dependencies and downloads the Electron runtime, so initial setup requires internet access. If the download is interrupted, rerun `npm ci`; do not skip install scripts. Once setup is complete, the app can run offline.
+**[Download EyeRecess →](https://github.com/ningninger/eyerecess/releases)**
 
-If you already installed npm packages but startup still reports a missing runtime, run `npm run setup:electron`, then `npm start`. Electron 45 defers its binary download by default; this project's postinstall step now downloads it during `npm ci`. Launch commands check installed files without initiating downloads.
+| Platform | Choose your build |
+| :--- | :--- |
+| **macOS** | Apple Silicon: `arm64` DMG · Intel: `x64` DMG |
+| **Windows** | Installer or portable executable |
+| **Linux** | Run from source or build an AppImage locally |
 
-If runtime setup reports a download failure, see [download recovery](docs/support.md#electron-download-failures) for proxy and optional mirror settings.
+1. Open the app, then find the eye icon in your menu bar or system tray.
+2. Open **Settings** and keep the recommended plan or choose your own rhythm.
+3. Get back to your day. Start a break manually whenever you need one.
+
+Closing Settings leaves EyeRecess running. Choose **Quit** from the menu to exit.
+
+> **Ready-to-run builds include the runtime.** You do not need Node.js, npm, or Electron to use an installer or portable build. GitHub's “Source code” archives are for development.
+
+### Before you install
+
+Current builds are unsigned and may trigger an operating system warning. Login startup is available only in packaged macOS and Windows apps. Linux Wayland can limit overlays, window positioning, and global shortcuts; see [platform compatibility](docs/compatibility.md).
+
+Activity and meeting detection are approximate: passive reading may count as idle, and a running meeting app can reduce reminders outside a call. EyeRecess supports break habits; it does not diagnose or treat medical conditions.
+
+## For the curious
+
+<details>
+<summary><strong>Run from source</strong> — Node.js 22.12.0+ and npm required</summary>
+
+From the repository root:
 
 ```bash
 npm ci
 npm start
-npm test
-npm run check
 ```
 
-On Windows, `EyeRecess.vbs` starts without a console; `npm run win` shows launcher output. See [Contributing](CONTRIBUTING.md) for repository rules and required validation.
+Initial setup requires internet access to install dependencies and download the Electron runtime. Let install scripts finish; once setup is complete, the app can run offline. Running from source does not install the app into your system's Applications folder.
 
-## Documentation
+Already installed packages, but the runtime is missing? Run `npm run setup:electron`, then `npm start`. For failed downloads, see [download recovery](docs/support.md#electron-download-failures).
+
+On Windows, `EyeRecess.vbs` starts without a console; `npm run win` shows launcher output.
+
+Before contributing, run `npm test` and `npm run check`, and read [Contributing](CONTRIBUTING.md).
+
+</details>
+
+<details>
+<summary><strong>Explore the project</strong> — behavior, development, and boundaries</summary>
 
 - [Product behavior](docs/product.md)
 - [Architecture and directory ownership](docs/architecture.md)
 - [Development workflow](docs/development.md)
 - [Release procedure](docs/release.md)
-- [Support](docs/support.md)
 - [Platform compatibility](docs/compatibility.md)
 - [Security boundaries](docs/security.md)
 - [Changelog](CHANGELOG.md)
 
-[MIT License](LICENSE)
+</details>
+
+---
+
+<p align="center">
+  <img src="assets/mark.svg" width="28" height="28" alt="" /><br />
+  <sub>A pause belongs in the plan. · <a href="LICENSE">MIT License</a></sub>
+</p>
