@@ -62,7 +62,21 @@ Closing Settings leaves EyeRecess running. Choose **Quit** from the menu to exit
 
 ### Before you install
 
-Current builds are unsigned and may trigger an operating system warning. Login startup is available only in packaged macOS and Windows apps. Linux Wayland can limit overlays, window positioning, and global shortcuts; see [platform compatibility](docs/compatibility.md).
+#### macOS: allow the first launch
+
+EyeRecess is free and open source. The maintainer is currently unable to cover the annual Apple Developer Program membership fee needed for Mac App Store distribution and Developer ID signing. The app is distributed through GitHub Releases instead; current macOS builds have no Developer ID signature or Apple notarization, so macOS may block the first launch with an unidentified-developer or verification warning. Users do not need to pay this membership fee.
+
+If you downloaded EyeRecess from this repository's [Releases](https://github.com/ningninger/eyerecess/releases) page and trust that copy:
+
+1. Open the DMG, drag **EyeRecess** into **Applications**, then try opening it once.
+2. If macOS blocks it, open **System Settings → Privacy & Security**, scroll down to the **Security** section, and click **Open Anyway** next to the EyeRecess notice.
+3. Authenticate if prompted, then click **Open** in the confirmation dialog. Labels and availability can vary by macOS version or device policy; see [Apple's instructions](https://support.apple.com/en-us/102445).
+
+The source code is public for community inspection, review, and issue reporting. This transparency supports community oversight; it is not a guarantee that every release has been independently audited. The steps above apply to developer-verification warnings. If macOS reports malware or that the app will damage your computer, stop and report it rather than overriding that warning.
+
+#### Other platform notes
+
+Current Windows builds are also unsigned and may trigger an operating system warning. Login startup is available only in packaged macOS and Windows apps. Linux Wayland can limit overlays, window positioning, and global shortcuts; see [platform compatibility](docs/compatibility.md).
 
 Activity and meeting detection are approximate: passive reading may count as idle, and a running meeting app can reduce reminders outside a call. EyeRecess supports break habits; it does not diagnose or treat medical conditions.
 
@@ -100,6 +114,16 @@ Before contributing, run `npm test` and `npm run check`, and read [Contributing]
 - [Changelog](CHANGELOG.md)
 
 </details>
+
+## Support a little recess
+
+EyeRecess is free and open source. If it helps your day, you can make a voluntary contribution toward project maintenance and Apple Developer Program membership fees. All features remain available whether or not you contribute. Thank you for your support.
+
+| WeChat appreciation | Alipay |
+| :---: | :---: |
+| <a href="docs/images/support-wechat.png"><img src="docs/images/support-wechat.png" width="200" height="200" alt="WeChat appreciation code for voluntary project support" /></a> | <a href="docs/images/support-alipay.png"><img src="docs/images/support-alipay.png" width="200" height="200" alt="Alipay QR code for voluntary project support" /></a> |
+
+Scan with the matching app, or click an image to view the full-size code.
 
 ---
 

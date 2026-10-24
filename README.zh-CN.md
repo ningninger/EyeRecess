@@ -62,7 +62,21 @@
 
 ### 安装前了解一下
 
-当前版本尚未签名，首次运行可能出现系统提示。登录后自动启动仅适用于已打包的 macOS 和 Windows 应用。Linux Wayland 下的遮罩、窗口定位和全局快捷键可能受限，详见[平台兼容性](docs/compatibility.md)。
+#### macOS 首次打开被阻止怎么办？
+
+EyeRecess 是免费开源工具。维护者目前无力承担用于 Mac App Store 分发和 Developer ID 签名的 Apple Developer Program 年费，因此暂时通过 GitHub Releases 分发。当前 macOS 构建尚无 Developer ID 签名，也未经过 Apple 公证，首次打开时可能出现「无法验证开发者」或「Apple 无法检查其是否包含恶意软件」等提示。**用户无需支付这笔会员费。**
+
+如果你从本仓库的 [Releases](https://github.com/ningninger/eyerecess/releases) 页面下载，并确认信任这份应用，可以按以下步骤打开：
+
+1. 打开 DMG，将 **EyeRecess** 拖入「应用程序」，然后先尝试打开一次。
+2. 如果系统阻止打开，前往 **「系统设置」→「隐私与安全性」**，向下滚动至靠近底部的 **「安全性」** 区域，在 EyeRecess 被阻止的提示旁点击 **「仍要打开」**。
+3. 按提示验证身份，并在确认窗口中点击「打开」。不同 macOS 版本或设备管理策略下，按钮名称与可用性可能不同，详见 [Apple 官方说明](https://support.apple.com/zh-cn/102445)。
+
+本项目代码公开，社区可以查看、检查、提出问题并参与改进，接受社区监督；这不代表每个版本都已通过独立安全审计。上述操作适用于开发者身份或公证验证提示；如果系统明确报告检测到恶意软件或应用会损坏电脑，请停止打开并反馈问题，不要绕过该警告。
+
+#### 其他平台说明
+
+当前 Windows 构建也尚未签名，首次运行可能出现系统提示。登录后自动启动仅适用于已打包的 macOS 和 Windows 应用。Linux Wayland 下的遮罩、窗口定位和全局快捷键可能受限，详见[平台兼容性](docs/compatibility.md)。
 
 活跃时间与会议检测都是估算：被动阅读可能被视为空闲，会议软件开着也可能触发轻提醒。这个工具用于帮助建立休息习惯，不用于诊断或治疗。权限与本地存储边界见[安全说明](docs/security.md)。
 
@@ -99,6 +113,16 @@ Windows 下，双击 `EyeRecess.vbs` 可无控制台启动；`npm run win` 可�
 提交改动前，请执行 `npm test` 和 `npm run check`。
 
 </details>
+
+## 支持一点「课间」
+
+EyeRecess 免费开源。如果它对你有帮助，欢迎自愿赞助，用于支持项目维护与 Apple 开发者年费。是否赞助都不影响完整功能的使用。谢谢你为这个小工具添一份支持。
+
+| 微信赞赏 | 支付宝 |
+| :---: | :---: |
+| <a href="docs/images/support-wechat.png"><img src="docs/images/support-wechat.png" width="200" height="200" alt="用于自愿支持项目的微信赞赏码" /></a> | <a href="docs/images/support-alipay.png"><img src="docs/images/support-alipay.png" width="200" height="200" alt="用于自愿支持项目的支付宝二维码" /></a> |
+
+使用对应应用扫码，也可以点击图片查看原尺寸二维码。
 
 ---
 
