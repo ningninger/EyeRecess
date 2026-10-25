@@ -7,14 +7,16 @@
     <link rel="stylesheet" href="overlay.css" />
   </head>
   <body>
-    <!-- Pointer-transparent micro reminder. -->
+    <!-- Pointer-transparent reminder with a dismissible control. -->
     <div id="glow" class="glow" hidden>
       <div class="glow-frame"></div>
       <div class="glow-hint" id="glowHint"></div>
+      <button id="dismissGlow" class="ghost dismiss-glow" type="button">关闭本次提醒 ×</button>
     </div>
 
     <!-- Guided short and long breaks. -->
     <div id="brk" class="brk" hidden>
+      <button id="close" class="ghost close-break" type="button">退出本次休息 ×</button>
       <div class="brk-inner">
         <img class="overlay-mark" src="../../../assets/mark.svg" width="36" height="36" alt="" />
         <div class="kicker" id="kicker"></div>
@@ -28,7 +30,7 @@
         </div>
 
         <h1 class="label" id="label">闭眼</h1>
-        <p class="sub" id="sub">什么都别看，就闭着</p>
+        <p class="sub" id="sub">闭上眼睛，放松片刻</p>
 
         <div class="blink" id="blink" hidden>
           <div class="blink-circle" id="blinkCircle"><span id="blinkWord">闭眼</span></div>
@@ -37,7 +39,7 @@
 
         <div class="actions">
           <button id="defer" class="ghost" hidden>延后 5 分钟</button>
-          <button id="end" class="ghost" hidden>提前结束</button>
+          <button id="end" class="ghost" type="button">退出本次休息</button>
         </div>
 
         <div class="foot" id="foot"></div>

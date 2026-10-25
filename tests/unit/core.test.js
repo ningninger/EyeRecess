@@ -37,9 +37,9 @@ section('Configuration: defaults and bounds');
 {
   const c = sanitize({});
   eq(c.micro.every, 600, 'Default micro interval is 600 seconds');
-  eq(c.micro.len, 30, 'Default micro duration is 30 seconds');
+  eq(c.micro.len, 20, 'Default micro duration is 20 seconds');
   eq(c.short.every, 3000, 'Default short interval is 3000 seconds');
-  eq(c.short.len, 90 + 30 + 80, 'Short duration is the sum of its phases');
+  eq(c.short.len, 40 + 20 + 60, 'Short duration is the sum of its phases');
   eq(c.long.every, 7200, 'Default long interval is 7200 seconds');
   eq(c.long.len, 600, 'Default long duration is 600 seconds');
   eq(c.idle.rest, 180, 'Default idle reset threshold is 180 seconds');
@@ -60,10 +60,10 @@ section('Configuration: defaults and bounds');
   eq(DEFAULTS.micro.every, 600, 'Normalization does not mutate shared defaults');
   const isolated = sanitize({});
   isolated.short.phases.eyes = 1;
-  eq(sanitize({}).short.phases.eyes, 90, 'Configuration instances do not share nested objects');
+  eq(sanitize({}).short.phases.eyes, 40, 'Configuration instances do not share nested objects');
   const malformed = sanitize({ micro: null, short: { phases: [] }, dnd: false });
   eq(malformed.micro.every, 600, 'Invalid configuration groups use defaults');
-  eq(malformed.short.len, 200, 'Invalid phase groups use defaults');
+  eq(malformed.short.len, 120, 'Invalid phase groups use defaults');
   eq(malformed.dnd.quietHours.enabled, false, 'Invalid quiet-mode groups use defaults');
   eq(sanitize('broken').micro.every, 600, 'Invalid root configuration uses defaults');
   eq(sanitize({ micro: { enabled: 'false' } }).micro.enabled, true, 'Malformed switches use boolean defaults');
@@ -92,6 +92,46 @@ section('Configuration: defaults and bounds');
   eq(sanitize(cyclic).micro.message, '', 'Non-text recursive input is rejected before merging');
 }
 
+section('Configuration: upgrading saved plans');
+{
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eyerecess-upgrade-'));
+  try {
+    const file = path.join(dir, 'config.json');
+    const previous = {
+      standard: [90, 30, 80], dense: [90, 30, 180],
+      classic: [90, 30, 180], gentle: [90, 30, 60],
+    };
+    for (const name of Object.keys(PRESETS)) {
+      const saved = applyPreset(sanitize({}), name);
+      saved.version = 1;
+      saved.micro.len = name === 'classic' ? 20 : 30;
+      saved.micro.message = 'Personal hint';
+      saved.ui.sound = true;
+      saved.short.phases = Object.fromEntries(['eyes', 'blink', 'stretch'].map((key, i) => [key, previous[name][i]]));
+      fs.writeFileSync(file, JSON.stringify(saved));
+      const upgraded = new Store(dir);
+      eq(upgraded.config.micro.len, 20, `${name} saved micro duration upgrades`);
+      eq(upgraded.config.short.len, applyPreset(sanitize({}), name).short.len, `${name} saved short plan upgrades`);
+      eq(upgraded.config.micro.message, 'Personal hint', 'Upgrade preserves custom copy');
+      eq(upgraded.config.ui.sound, true, 'Upgrade preserves system and interface preferences');
+      upgraded.patch({ ui: { sound: false } });
+      eq(new Store(dir).config.version, 2, 'Upgraded settings persist the new version');
+    }
+    for (const preset of ['custom', 'standard']) {
+      const saved = sanitize({ preset, short: { phases: { eyes: 55, blink: 25, stretch: 65 } } });
+      saved.version = 1;
+      fs.writeFileSync(file, JSON.stringify(saved));
+      eq(new Store(dir).config.short.phases.eyes, 55, 'Upgrade preserves individually adjusted timings');
+    }
+    const custom = sanitize({ preset: 'custom', micro: { len: 30 } });
+    custom.version = 1;
+    fs.writeFileSync(file, JSON.stringify(custom));
+    eq(new Store(dir).config.micro.len, 30, 'Upgrade leaves explicitly custom durations unchanged');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 section('Configuration: presets');
 {
   const base = sanitize({});
@@ -105,9 +145,9 @@ section('Configuration: presets');
   eq(dense.short.every, 2400, 'Dense short interval is 40 minutes');
   eq(dense.long.len, 900, 'Dense long duration is 15 minutes');
   ok(Object.keys(PRESETS).length === 4, 'Four presets are available');
-  eq(dense.short.len, 300, 'Dense short duration is 5 minutes');
-  eq(applyPreset(dense, 'gentle').short.len, 180, 'Gentle preset resets phases to 3 minutes');
-  eq(applyPreset(dense, 'standard').short.len, 200, 'Standard preset resets phases to 200 seconds');
+  eq(dense.short.len, 180, 'Dense short duration is 3 minutes');
+  eq(applyPreset(dense, 'gentle').short.len, 90, 'Gentle preset resets phases to 90 seconds');
+  eq(applyPreset(dense, 'standard').short.len, 120, 'Standard preset resets phases to 120 seconds');
   for (const name of Object.keys(PRESETS)) {
     const cfg = applyPreset(base, name);
     eq(buildPlan('short', cfg).reduce((sum, phase) => sum + phase.ms, 0), cfg.short.len * 1000, `${name} plan duration matches the configuration`);

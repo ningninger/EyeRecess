@@ -185,7 +185,7 @@ function updateTray(force = false) {
   const tip = breaks.resting
     ? 'EyeRecess · 正在休息'
     : isPaused()
-      ? `EyeRecess · 已暂停（${Math.ceil((cfg.pausedUntil - Date.now()) / 60000)} 分钟）`
+      ? `EyeRecess · 提醒已暂停（${Math.ceil((cfg.pausedUntil - Date.now()) / 60000)} 分钟）`
       : `EyeRecess · 连续用眼 ${fmtDur(p.streak)}，${cfg.micro.enabled ? `${fmtDur(p.microLeft)}后微休息` : '微休息已关闭'}`;
   tray.setToolTip(tip);
 
@@ -223,12 +223,16 @@ function buildMenu() {
       enabled: false,
     },
     { type: 'separator' },
+    { label: '退出本次休息 / 关闭提醒', click: () => {
+      if (breaks.session) breaks.handleOverlayAction('cancel', breaks.session.token);
+      overlay.hideGlow();
+    } },
     { label: `立即短休息（${fmtDur(cfg.short.len)}）`, click: () => breaks.startBreak('short') },
     { label: `立即长休息（${fmtDur(cfg.long.len)}）`, click: () => breaks.startBreak('long') },
     { type: 'separator' },
     paused
       ? {
-          label: '恢复计时',
+          label: '恢复提醒',
           click: () => {
             cfg = store.patch({ pausedUntil: 0 });
             applyConfig();
@@ -236,8 +240,10 @@ function buildMenu() {
             pushState();
           },
         }
-      : { label: '暂停 30 分钟', click: () => togglePause(30) },
-    { label: '专注 / 开会 60 分钟', click: () => setFocus(60) },
+      : { label: '暂停提醒 30 分钟', click: () => togglePause(30) },
+    dnd.focusActive()
+      ? { label: '结束专注', click: () => { dnd.stopFocus(); updateTray(true); pushState(); } }
+      : { label: '专注 / 开会 60 分钟', click: () => setFocus(60) },
     { type: 'separator' },
     { label: '休息方案', submenu: presetItems },
     { label: dnd.describe(cfg), enabled: false },
@@ -540,7 +546,10 @@ function init() {
   tracker = new Tracker(cfg);
   overlay = new Overlay({
     onAction: (action, token) => breaks.handleOverlayAction(action, token),
-    onDismiss: () => breaks.endSession(),
+    onDismiss: () => {
+      tracker.clampAfterDnd();
+      breaks.endSession();
+    },
   });
   breaks = new BreakController({
     getConfig: () => cfg, tracker, stats, overlay, beep: () => shell.beep(),

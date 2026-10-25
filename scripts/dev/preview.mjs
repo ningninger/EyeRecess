@@ -22,7 +22,7 @@ const state = {
   config: cfg,
   presets: Object.fromEntries(Object.entries(PRESETS).map(([key, { label, hint }]) => [key, { label, hint }])),
   stats: { today, recent: days.map(([date, activeSec]) => ({ date, activeSec })) },
-  progress: { streak: 1380, microLeft: 240, micro: 0.6 },
+  progress: { streak: 1380, microLeft: 240, micro: 0.6, shortLeft: 1620, short: 0.46, longLeft: 5820, long: 0.19 },
   dnd: { label: '\u6b63\u5e38', meeting: false, focusUntil: 0, quiet: false },
   resting: false,
   paused: false,

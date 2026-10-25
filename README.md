@@ -40,6 +40,7 @@ Start with the recommended plan, then adjust it to fit your routine. EyeRecess e
 - **Start simple.** Choose a preset or keep the recommended plan.
 - **Add your own nudge.** Customize timings, break steps, and reminder text.
 - **Leave room for focus.** Pause reminders, set quiet hours, or use lighter reminders when meeting software is running.
+- **Stay in control.** Exit any guided break with its exit button or Escape. Micro reminders last 20 seconds; the standard short break lasts two minutes.
 - **Keep it local.** Settings and daily summaries stay on your computer, with no account or cloud sync.
 
 ## Your first recess

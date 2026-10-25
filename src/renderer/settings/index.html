@@ -15,7 +15,7 @@
           <h1>EyeRecess<span class="cn">课间</span></h1>
           <span class="version" id="version"></span>
         </div>
-        <button id="quit" class="link">退出</button>
+        <button id="quit" class="link">退出应用</button>
       </div>
 
       <div class="hero-message"><span class="dot" id="dot"></span><p>认真工作，也给眼睛一点课间。</p></div>
@@ -26,7 +26,7 @@
           <span class="stat-v" id="s-streak">—</span>
         </div>
         <div class="stat">
-          <span class="stat-k">下次微休息</span>
+          <span class="stat-k" id="next-label">下次提醒</span>
           <span class="stat-v" id="s-micro">—</span>
         </div>
         <div class="stat">
@@ -40,12 +40,20 @@
       <div class="quick">
         <button class="primary" id="rest3">立即短休息</button>
         <button class="ghost" id="rest10">长休息</button>
-        <button class="ghost" id="pauseBtn">暂停 30 分钟</button>
+        <button class="ghost" id="pauseBtn">暂停提醒 30 分钟</button>
+        <button class="ghost" id="endFocus" hidden>结束专注</button>
       </div>
       <p class="hint" id="dnd-hint"></p>
     </header>
 
     <main>
+      <nav class="section-nav" aria-label="设置导航">
+        <button type="button" data-section="plan">方案</button>
+        <button type="button" data-section="micro">微休息</button>
+        <button type="button" data-section="short">短休息</button>
+        <button type="button" data-section="long">长休息</button>
+        <button type="button" data-section="dnd">更多设置</button>
+      </nav>
       <section id="sec-plan">
         <div class="section-heading">
           <h2>按自己的节奏休息</h2>
@@ -54,8 +62,6 @@
         <p class="intro">从推荐方案开始，让每一次休息都适合你。</p>
         <div class="presets" id="presets"></div>
         <p class="note" id="preset-hint" aria-live="polite"></p>
-        <p class="save-status" id="save-status" role="status" aria-live="polite">修改后自动保存，仅存于本机</p>
-        <button class="link" id="retrySave" type="button" hidden>重试保存</button>
       </section>
 
       <section id="sec-micro">
@@ -169,7 +175,7 @@
           <span class="unit">到</span>
           <input type="time" id="quietEnd" aria-label="勿扰结束时间" required />
         </div>
-        <p class="note">勿扰期间继续记录活跃时间，但不会弹出提醒；恢复后会留出缓冲时间。</p>
+        <p class="note">暂停提醒、专注和勿扰期间继续记录活跃时间；恢复后会留出缓冲时间。会议软件检测仅根据是否在运行判断，可能在没有开会时也减少提醒。</p>
       </section>
 
       <section id="sec-ui">
@@ -191,7 +197,7 @@
             <option value="cursor">只遮鼠标所在屏幕</option>
           </select>
         </div>
-        <p class="note">快捷键：<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd> 立刻休息 · <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> 暂停 / 恢复（macOS 上是 <kbd>⌘</kbd> 代替 <kbd>Ctrl</kbd>）</p>
+        <p class="note">快捷键：<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd> 立刻休息 · <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>P</kbd> 暂停 / 恢复提醒（macOS 上是 <kbd>⌘</kbd> 代替 <kbd>Ctrl</kbd>）</p>
       </section>
 
       </details>
@@ -217,6 +223,11 @@
         </div>
       </details>
     </main>
+
+    <footer class="save-bar" aria-label="保存状态">
+      <p class="save-status" id="save-status" role="status" aria-live="polite">修改后自动保存，仅存于本机</p>
+      <button class="link" id="retrySave" type="button" hidden>重试保存</button>
+    </footer>
 
     <script src="settings.js"></script>
   </body>

@@ -34,8 +34,10 @@ if (MODE === 'veil') {
 }
 
 let glowTimer = 0;
+let glowToken = null;
 
 function showGlow(payload) {
+  glowToken = payload?.token;
   const ms = (payload && payload.ms) || 12000;
   glowEl.hidden = false;
   glowEl.classList.remove('play');
@@ -65,7 +67,7 @@ function fmtLeft(ms) {
 
 function updateBlink(elapsed, total) {
   const ROUND = 6000;
-  const rounds = Math.max(1, Math.round(total / ROUND));
+  const rounds = Math.max(1, Math.ceil(total / ROUND));
   const idx = Math.min(rounds - 1, Math.floor(elapsed / ROUND));
   const t = Math.max(0, elapsed - idx * ROUND);
   let word = '闭眼';
@@ -74,18 +76,17 @@ function updateBlink(elapsed, total) {
     word = '闭眼';
     cls = 'small';
   } else if (t < 4000) {
-    word = '闭着';
+    word = '放松';
     cls = 'small';
   } else {
-    word = '用力闭紧';
-    cls = 'tight';
+    word = '睁眼';
+    cls = 'open';
   }
   const key = word + ':' + idx;
   if (key === lastBlinkKey) return;
   lastBlinkKey = key;
   blinkWord.textContent = word;
   blinkCircle.classList.toggle('small', cls === 'small');
-  blinkCircle.classList.toggle('tight', cls === 'tight');
   blinkRound.textContent = `第 ${idx + 1} / ${rounds} 轮`;
 }
 
@@ -117,13 +118,8 @@ function showBreak(s) {
 
   deferBtn.hidden = !s.canDefer;
   deferBtn.textContent = `延后 ${s.deferMin || 5} 分钟`;
-  endBtn.hidden = !s.allowEnd;
-
-  const foot = [];
-  if (s.canDefer) foot.push('Esc 延后');
-  if (s.allowEnd) foot.push('回车 提前结束');
-
-  footEl.textContent = foot.length ? foot.join('   ·   ') : '请闭眼休息，倒计时结束后自动继续';
+  endBtn.hidden = false;
+  footEl.textContent = '随时可以退出 · Esc 退出本次休息';
 
   cancelAnimationFrame(raf);
   frame();
@@ -133,23 +129,27 @@ deferBtn.addEventListener('click', () => {
   if (cur) window.ov.action('defer', cur.token);
 });
 
-endBtn.addEventListener('click', () => {
-  if (cur) window.ov.action('end', cur.token);
+function cancelBreak() {
+  if (cur) window.ov.action('cancel', cur.token);
+}
+
+endBtn.addEventListener('click', cancelBreak);
+$('close').addEventListener('click', cancelBreak);
+$('dismissGlow').addEventListener('click', () => {
+  if (glowToken !== null) window.ov.action('dismiss-glow', glowToken);
 });
 
 window.addEventListener('keydown', (e) => {
-  if (!cur) return;
-  if (e.key === 'Escape' && !deferBtn.hidden) window.ov.action('defer', cur.token);
-  else if ((e.key === 'Enter' || e.key === ' ') && !endBtn.hidden) {
-    e.preventDefault();
-    window.ov.action('end', cur.token);
-  }
+  if (!cur || e.key !== 'Escape') return;
+  e.preventDefault();
+  cancelBreak();
 });
 
 window.ov.onGlow(showGlow);
 window.ov.onBreak(showBreak);
 window.ov.onHide(() => {
   cur = null;
+  glowToken = null;
   cancelAnimationFrame(raf);
   clearTimeout(glowTimer);
   glowEl.hidden = brkEl.hidden = true;

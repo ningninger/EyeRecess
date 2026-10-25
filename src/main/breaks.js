@@ -27,10 +27,9 @@ function buildPlan(kind, c) {
     if (c.short.phases.blink > 0) {
       out.push({
         id: 'blink',
-        label: '眨眼训练',
-        sub: '跟着节奏：闭 · 闭 · 挤',
+        label: '轻柔眨眼',
+        sub: '轻轻闭眼，再自然睁开，无需用力；不舒服时可随时退出',
         ms: c.short.phases.blink * 1000,
-        allowEnd: true,
       });
     }
     if (c.short.phases.stretch > 0) {
@@ -39,7 +38,6 @@ function buildPlan(kind, c) {
         label: '起身 / 远眺',
         sub: c.short.message || '站起来走两步，或者看看 6 米外',
         ms: c.short.phases.stretch * 1000,
-        allowEnd: true,
       });
     }
     return out;
@@ -56,9 +54,8 @@ function buildPlan(kind, c) {
     {
       id: 'away',
       label: '离开屏幕',
-      sub: c.long.message || '走一走、喝口水、看看远处。屏幕黑着就对了',
+      sub: c.long.message || '走一走、喝口水、看看远处，按舒服的节奏放松',
       ms: Math.max(3, c.long.len - eyes) * 1000,
-      allowEnd: true,
     },
   ].filter((phase) => phase.ms > 0);
 }
@@ -93,7 +90,7 @@ class BreakController {
       if (!this.session || this.session.token !== token) return;
       const cfg = this.getConfig();
       const canDefer = Boolean(p.canDefer) && cfg[kind].defer > this.deferUsed[kind];
-      this.session.phase = { canDefer, allowEnd: Boolean(p.allowEnd) };
+      this.session.phase = { canDefer };
       this.overlay.showBreak({
         token,
         kind,
@@ -105,15 +102,13 @@ class BreakController {
         index: i,
         total: plan.length,
         canDefer,
-        allowEnd: Boolean(p.allowEnd),
+        allowEnd: true,
         deferMin: cfg[kind].deferMinutes || 5,
         dim: cfg.ui.dim,
       });
       const why = await this.waitPhase(p.ms, token);
       if (!this.session || this.session.token !== token) return;
       if (why === 'defer') return this.doDefer(kind);
-      if (why === 'end') return this.finishBreak(kind);
-      if (why === 'skip') return this.doSkip(kind);
       if (why === 'abort') return this.endSession();
     }
     if (!this.session || this.session.token !== token) return;
@@ -138,15 +133,15 @@ class BreakController {
 
   handleOverlayAction(action, token) {
     if (!this.session || this.session.token !== token) return;
+    if (['cancel', 'end', 'skip'].includes(action)) return this.doSkip(this.session.kind);
     if (action === 'defer' && this.session.phase?.canDefer) return void this.pendingResolve?.('defer');
-    if (action === 'end' && this.session.phase?.allowEnd) return void this.pendingResolve?.('end');
-    if (action === 'skip' && this.session.phase?.allowEnd) return void this.pendingResolve?.('skip');
     return undefined;
   }
 
   doSkip(kind) {
     this.stats.add('skip');
-    this.tracker.deferFor(kind, 120);
+    this.tracker.clampAfterDnd();
+    this.tracker.deferFor(kind, 300);
     this.stats.save();
     this.endSession();
   }

@@ -3,6 +3,8 @@
 const $ = (id) => document.getElementById(id);
 let state = null;
 let saveTimer = 0;
+let dirty = false;
+let presetKey = '';
 
 function fmtDur(sec) {
   const s = Math.max(0, Math.round(sec));
@@ -99,6 +101,9 @@ function renderConfig(cfg) {
 }
 
 function renderPresets(state) {
+  const key = JSON.stringify([state.presets, state.config.preset, saving]);
+  if (key === presetKey) return;
+  presetKey = key;
   const wrap = $('presets');
   wrap.innerHTML = '';
   for (const [key, meta] of Object.entries(state.presets)) {
@@ -121,7 +126,7 @@ function collect() {
       enabled: chk('micro-enabled'),
       message: val('micro-message'),
       every: Math.round(num('micro-every', 10) * 60),
-      len: Math.round(num('micro-len', 30)),
+      len: Math.round(num('micro-len', 20)),
       forceEvery: Math.round(num('micro-forceEvery', 3)),
       forceLen: Math.round(num('micro-forceLen', 20)),
     },
@@ -130,9 +135,9 @@ function collect() {
       message: val('short-message'),
       every: Math.round(num('short-every', 50) * 60),
       phases: {
-        eyes: Math.round(num('short-eyes', 90)),
-        blink: Math.round(num('short-blink', 30)),
-        stretch: Math.round(num('short-stretch', 80)),
+        eyes: Math.round(num('short-eyes', 40)),
+        blink: Math.round(num('short-blink', 20)),
+        stretch: Math.round(num('short-stretch', 60)),
       },
     },
     long: {
@@ -176,8 +181,8 @@ function renderDraft() {
     const enabled = chk(kind + '-enabled');
     $(kind + '-fields').disabled = !enabled;
     const seconds = kind === 'short'
-      ? num('short-eyes', 90) + num('short-blink', 30) + num('short-stretch', 80)
-      : num(kind + '-len', kind === 'micro' ? 30 : 10) * (kind === 'long' ? 60 : 1);
+      ? num('short-eyes', 40) + num('short-blink', 20) + num('short-stretch', 60)
+      : num(kind + '-len', kind === 'micro' ? 20 : 10) * (kind === 'long' ? 60 : 1);
     $(kind + '-summary').textContent = enabled
       ? `每累计使用 ${num(kind + '-every', 10)} 分钟，${kind === 'micro' ? '轻提醒' : '休息'} ${fmtDur(seconds)}${kind === 'micro' ? '，并定期安排闭眼。' : '。'}`
       : '自动提醒已关闭，仍可手动开始休息。';
@@ -188,7 +193,7 @@ function renderDraft() {
   $('hideDock').disabled = !state?.app.canHideDock;
   $('short-eyes').setCustomValidity('');
   const shortTotal = num('short-eyes', 0) + num('short-blink', 0) + num('short-stretch', 0);
-  $('short-total').textContent = `一轮短休息合计 ${fmtDur(shortTotal)}。闭眼这一步可以延后一次。`;
+  $('short-total').textContent = `一轮短休息合计 ${fmtDur(shortTotal)}。${num('short-eyes', 0) > 0 && state?.config.short.defer > 0 ? '闭眼这一步可延后；' : ''}每一步都可随时退出。`;
   if (shortTotal === 0) {
     $('short-eyes').setCustomValidity('请至少保留一项休息内容。');
   }
@@ -217,6 +222,7 @@ async function choosePlan(key) {
   saveStatus('正在保存方案…');
   try {
     const s = key ? await window.api.preset(key) : await window.api.resetPlan();
+    dirty = false;
     applyState(s);
     saveStatus(key ? '方案已应用并保存' : '已恢复推荐方案，其他偏好保持不变');
   } catch (err) {
@@ -259,6 +265,7 @@ async function save() {
         return;
       }
     }
+    dirty = false;
     saveStatus('已自动保存，仅存于本机');
   } catch (err) {
     console.error('Failed to save settings', err);
@@ -271,29 +278,39 @@ async function save() {
 
 function renderStatus(s) {
   const p = s.progress;
+  const focus = s.dnd.focusUntil > Date.now();
+  const silent = s.paused || focus || s.dnd.quiet;
+  const next = [
+    ['long', '长休息'], ['short', '短休息'], ['micro', '微休息'],
+  ].filter(([kind]) => s.config[kind].enabled)
+    .sort(([a], [b]) => p[a + 'Left'] - p[b + 'Left']);
+  const [kind, label] = next[0] || [];
   $('s-streak').textContent = fmtDur(p.streak);
-  $('s-micro').textContent = s.config.micro.enabled ? fmtClock(p.microLeft) : '已关闭';
+  $('next-label').textContent = kind ? `下次${label}` : '自动提醒';
+  $('s-micro').textContent = s.resting ? '休息中' : silent ? '免打扰' : kind ? fmtClock(p[kind + 'Left']) : '已关闭';
   $('s-today').textContent = fmtDur(s.stats.today.activeSec);
-  $('bar-micro').style.width = `${Math.round(p.micro * 100)}%`;
+  $('bar-micro').style.width = `${!silent && !s.resting && kind ? Math.round(p[kind] * 100) : 0}%`;
 
   const dot = $('dot');
-  dot.className = 'dot' + (s.resting ? ' rest' : s.paused ? ' paused' : '');
+  dot.className = 'dot' + (s.resting ? ' rest' : silent ? ' paused' : '');
 
   const pauseBtn = $('pauseBtn');
-  pauseBtn.textContent = s.paused ? `恢复计时（还剩 ${s.pauseLeft} 分钟）` : '暂停 30 分钟';
+  pauseBtn.textContent = s.paused ? `恢复提醒（还剩 ${s.pauseLeft} 分钟）` : '暂停提醒 30 分钟';
+  $('endFocus').hidden = !focus;
   $('rest3').disabled = $('rest10').disabled = s.resting;
 
   const bits = [];
   if (s.resting) bits.push('正在休息');
-  if (s.paused) bits.push(`已暂停 ${s.pauseLeft} 分钟`);
+  if (s.paused) bits.push(`提醒已暂停，还剩 ${s.pauseLeft} 分钟`);
   if (s.dnd.label && s.dnd.label !== '正常') bits.push(s.dnd.label);
-  $('dnd-hint').textContent = bits.join(' · ') || '按你的节奏，定期留一点休息时间。';
+  if (silent) bits.push('继续记录活跃时间');
+  $('dnd-hint').textContent = bits.join(' · ') || '关闭设置窗口后，提醒仍会在后台运行；休息时可随时按 Esc 退出。';
 }
 
 function renderStats(s) {
   const t = s.stats.today;
   const cells = [
-    ['微休息', t.micro, '次（其中强制闭眼 ' + t.forced + ' 次）'],
+    ['微休息', t.micro, '次（其中闭眼提醒 ' + t.forced + ' 次）'],
     ['短休息', t.short, '次完成'],
     ['长休息', t.long, '次完成'],
     ['提醒', t.reminded, '次触发'],
@@ -373,6 +390,7 @@ for (const id of [...INPUTS, ...CHECKS, ...MESSAGES]) {
   if (!el) continue;
   el.addEventListener('change', save);
   el.addEventListener('input', () => {
+    dirty = true;
     draftVersion++;
     renderDraft();
     saveStatus('有未保存的修改，编辑完成后自动保存');
@@ -400,6 +418,7 @@ $('pauseBtn').addEventListener('click', () => {
   const s = state;
   return runAction(() => window.api.pause(s && s.paused ? 0 : 30));
 });
+$('endFocus').addEventListener('click', () => runAction(() => window.api.focus(0), '已结束专注，其他免打扰设置仍然有效'));
 $('quit').addEventListener('click', () => window.api.quit());
 let resetConfirmation = false;
 let resetTimer;
@@ -420,9 +439,7 @@ $('resetStats').addEventListener('click', () => {
 });
 
 window.api.onState((s) => {
-  state = s;
-  renderStatus(s);
-  renderStats(s);
+  applyState(s, { keepInputs: dirty || saving });
 });
 
 function showSection(section, behavior = 'smooth') {
@@ -433,10 +450,14 @@ function showSection(section, behavior = 'smooth') {
     if (parent.tagName === 'DETAILS') parent.open = true;
     parent = parent.parentElement;
   }
-  el.scrollIntoView({ behavior, block: 'start' });
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  el.scrollIntoView({ behavior: reduceMotion ? 'instant' : behavior, block: 'start' });
 }
 
 window.api.onScrollTo((section) => showSection(section));
+for (const button of document.querySelectorAll('[data-section]')) {
+  button.addEventListener('click', () => showSection(button.dataset.section));
+}
 
 (async () => {
   const s = await window.api.getState();

@@ -148,7 +148,7 @@ body.veil {
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  padding: 32px;
+  padding: 88px 32px 32px;
   text-align: center;
   max-width: 620px;
 }
@@ -244,10 +244,6 @@ body.veil {
   transform: scale(0.62);
 }
 
-.blink-circle.tight {
-  transform: scale(0.42);
-}
-
 .blink-round {
   font-size: 14px;
   color: var(--fg-dim);
@@ -307,12 +303,22 @@ body.veil .brk-inner {
 }
 
 .overlay-mark { border-radius: 11px; }
+.close-break, .dismiss-glow {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+}
+button.close-break, button.dismiss-glow { color: var(--fg); background: #213d31; }
+button.dismiss-glow { pointer-events: auto; width: 160px; height: 44px; padding: 8px; }
+.brk { overflow-y: auto; }
+.brk-inner { margin: auto; flex-shrink: 0; }
 .brk { background: radial-gradient(ellipse at 50% 0%, #172d25, #0e1713 75%); }
 .ring .track { stroke-width: 3; }
 .ring .prog { stroke-width: 3; }
 button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 @media (max-height: 680px) {
-  .brk-inner { gap: 8px; padding: 20px; }
+  .brk-inner { gap: 8px; padding: 80px 20px 20px; }
   .ring, .ring svg { width: 140px; height: 140px; }
   .ring .time { font-size: 30px; }
   .blink-circle { width: 80px; height: 80px; font-size: 16px; }

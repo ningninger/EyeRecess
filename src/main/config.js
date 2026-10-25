@@ -7,43 +7,43 @@ const path = require('path');
 const PRESETS = {
   standard: {
     label: '标准（推荐）',
-    hint: '每 10 分钟微休息 30 秒 · 每 50 分钟短休息 3 分 20 秒',
-    micro: { enabled: true, every: 600, len: 30 },
-    short: { enabled: true, every: 3000, phases: { eyes: 90, blink: 30, stretch: 80 } },
+    hint: '每 10 分钟微休息 20 秒 · 每 50 分钟短休息 2 分钟',
+    micro: { enabled: true, every: 600, len: 20 },
+    short: { enabled: true, every: 3000, phases: { eyes: 40, blink: 20, stretch: 60 } },
     long: { enabled: true, every: 7200, len: 600 },
   },
   dense: {
-    label: '干眼友好（更密）',
-    hint: '每 6 分钟微休息 30 秒 · 每 40 分钟短休息 5 分钟',
-    micro: { enabled: true, every: 360, len: 30 },
-    short: { enabled: true, every: 2400, phases: { eyes: 90, blink: 30, stretch: 180 } },
+    label: '更频繁',
+    hint: '每 6 分钟微休息 20 秒 · 每 40 分钟短休息 3 分钟',
+    micro: { enabled: true, every: 360, len: 20 },
+    short: { enabled: true, every: 2400, phases: { eyes: 60, blink: 20, stretch: 100 } },
     long: { enabled: true, every: 6000, len: 900 },
   },
   classic: {
     label: '20-20-20（经典）',
-    hint: '每 20 分钟看 20 英尺（约 6 米）外 20 秒 · 保留短休息与长休息',
+    hint: '每 20 分钟看 20 英尺（约 6 米）外 20 秒 · 每 60 分钟短休息 2 分钟 · 保留长休息',
     micro: { enabled: true, every: 1200, len: 20 },
-    short: { enabled: true, every: 3600, phases: { eyes: 90, blink: 30, stretch: 180 } },
+    short: { enabled: true, every: 3600, phases: { eyes: 40, blink: 20, stretch: 60 } },
     long: { enabled: true, every: 7200, len: 600 },
   },
   gentle: {
     label: '轻打扰',
-    hint: '每 15 分钟微休息 30 秒 · 每 60 分钟短休息 3 分钟',
-    micro: { enabled: true, every: 900, len: 30 },
-    short: { enabled: true, every: 3600, phases: { eyes: 90, blink: 30, stretch: 60 } },
+    hint: '每 15 分钟微休息 20 秒 · 每 60 分钟短休息 1 分 30 秒',
+    micro: { enabled: true, every: 900, len: 20 },
+    short: { enabled: true, every: 3600, phases: { eyes: 20, blink: 20, stretch: 50 } },
     long: { enabled: true, every: 7200, len: 600 },
   },
 };
 
 const DEFAULTS = {
-  version: 1,
+  version: 2,
   preset: 'standard',
 
   micro: {
     enabled: true,
     message: '',
     every: 600,
-    len: 30,
+    len: 20,
     style: 'glow',
     forceEvery: 3,
     forceLen: 20,
@@ -56,9 +56,9 @@ const DEFAULTS = {
     defer: 1,
     deferMinutes: 5,
     phases: {
-      eyes: 90,
-      blink: 30,
-      stretch: 80,
+      eyes: 40,
+      blink: 20,
+      stretch: 60,
     },
   },
 
@@ -149,16 +149,16 @@ function sanitize(cfg) {
   }
 
   c.micro.every = clampNum(c.micro.every, 60, 7200, 600);
-  c.micro.len = clampNum(c.micro.len, 10, 300, 30);
+  c.micro.len = clampNum(c.micro.len, 10, 300, DEFAULTS.micro.len);
   c.micro.forceLen = clampNum(c.micro.forceLen, 10, 120, 20);
   c.micro.forceEvery = clampNum(c.micro.forceEvery, 1, 10, 3);
   c.micro.forceEvery = Math.round(c.micro.forceEvery);
   c.micro.style = 'glow';
 
   c.short.every = clampNum(c.short.every, 300, 21600, 3000);
-  c.short.phases.eyes = clampNum(c.short.phases.eyes, 0, 600, 90);
-  c.short.phases.blink = clampNum(c.short.phases.blink, 0, 180, 30);
-  c.short.phases.stretch = clampNum(c.short.phases.stretch, 0, 600, 80);
+  c.short.phases.eyes = clampNum(c.short.phases.eyes, 0, 600, DEFAULTS.short.phases.eyes);
+  c.short.phases.blink = clampNum(c.short.phases.blink, 0, 180, DEFAULTS.short.phases.blink);
+  c.short.phases.stretch = clampNum(c.short.phases.stretch, 0, 600, DEFAULTS.short.phases.stretch);
 
   c.long.every = clampNum(c.long.every, 1200, 28800, 7200);
   c.long.eyes = clampNum(c.long.eyes, 0, 600, 60);
@@ -206,6 +206,23 @@ function applyPreset(cfg, name) {
   return sanitize(next);
 }
 
+// Upgrade shipped timings only; preserve custom values and unrelated preferences.
+function upgradeStoredPlan(input) {
+  if (!isObj(input) || input.version !== 1 || !Object.hasOwn(PRESETS, input.preset)) return input;
+  const next = knownConfig(input);
+  const plan = PRESETS[input.preset];
+  const previous = {
+    standard: [90, 30, 80], dense: [90, 30, 180],
+    classic: [90, 30, 180], gentle: [90, 30, 60],
+  }[input.preset];
+  if (next.micro?.every === plan.micro.every && next.micro.len === 30) next.micro.len = 20;
+  if (next.short?.every === plan.short.every &&
+      ['eyes', 'blink', 'stretch'].every((key, i) => next.short.phases?.[key] === previous[i])) {
+    next.short.phases = { ...plan.short.phases };
+  }
+  return next;
+}
+
 class Store {
   constructor(dir) {
     this.dir = dir;
@@ -217,7 +234,7 @@ class Store {
     try {
       if (fs.statSync(this.file).size > 256 * 1024) return sanitize({});
       const raw = fs.readFileSync(this.file, 'utf8');
-      return sanitize(JSON.parse(raw));
+      return sanitize(upgradeStoredPlan(JSON.parse(raw)));
     } catch {
       return sanitize({});
     }

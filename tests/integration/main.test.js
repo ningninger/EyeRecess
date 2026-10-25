@@ -380,11 +380,8 @@ async function main() {
   const first = shortOv[shortOv.length - 1].payload;
   eq(first.phase, 'eyes', 'Short break begins with eye closure');
   eq(first.canDefer, true, 'Short break permits one deferral');
-  eq(first.allowEnd, false, 'Eye closure cannot end early');
+  eq(first.allowEnd, true, 'Eye closure always allows exit');
   ok(wins.some((w) => w.visible), 'Break overlay is visible');
-  ipcMainEmit('overlay:action', { action: 'end', token: first.token });
-  await flush();
-  eq((await ipcHandle.get('app:get-state')(fakeEvent())).resting, true, 'Main process rejects early end during eye closure');
 
   section('One deferral retries after five minutes without another allowance');
   const deferAt = now;
@@ -403,7 +400,7 @@ async function main() {
   ok(backIn >= 295 && backIn <= 320, `Deferral lasts five minutes: ${backIn} seconds`);
   const second = again[again.length - 1].payload;
   eq(second.canDefer, false, 'The same break cannot be deferred twice');
-  eq(second.allowEnd, false, 'Eye closure still cannot end early');
+  eq(second.allowEnd, true, 'Exit remains available after the deferral allowance is exhausted');
   ipcMainEmit('overlay:action', { action: 'defer', token: second.token });
   await flush();
   eq((await ipcHandle.get('app:get-state')(fakeEvent())).resting, true, 'Main process rejects deferral beyond its allowance');
@@ -416,7 +413,7 @@ async function main() {
   const stretchBefore = breaks((p) => p.phase === 'stretch').length;
   ipcMainEmit('overlay:action', { action: 'end', token: blinkOv[blinkOv.length - 1].payload.token });
   await flush();
-  await advance(5 * 60 * 1000);
+  await advance(30 * 1000);
   eq(breaks((p) => p.phase === 'stretch').length, stretchBefore, 'Early end prevents later phases');
   ok(!wins.some((w) => w.visible), 'Early end hides the overlay');
 
@@ -500,6 +497,11 @@ async function main() {
   eq(resumed.paused, false, 'Pause can be cleared');
   const focus = await ipcHandle.get('app:focus')(fakeEvent(), 45);
   ok(focus.dnd.focusUntil > Date.now(), 'Focus mode can be enabled');
+  const focusExit = tray.menu.items.find(item => item.label === '\u7ed3\u675f\u4e13\u6ce8');
+  ok(focusExit, 'The tray offers an exit from manual focus');
+  focusExit.click();
+  eq((await ipcHandle.get('app:get-state')(fakeEvent())).dnd.focusUntil, 0, 'Tray exit clears manual focus');
+  await ipcHandle.get('app:focus')(fakeEvent(), 45);
   const sb = await ipcHandle.get('app:start-break')(fakeEvent(), 'short');
   eq(sb.resting, true, 'Manual breaks are available during focus');
 

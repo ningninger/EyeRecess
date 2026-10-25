@@ -16,9 +16,15 @@ Micro reminders normally use an unobtrusive edge glow. At a configurable frequen
 
 The default schedule is a micro reminder after 10 active minutes, a short break after 50 active minutes, and a long break after two active hours. Presets and individual timings are configurable. The classic and gentle presets still include short and long breaks.
 
+All presets use 20-second micro reminders. Standard and classic short breaks last two minutes (40 seconds of eye closure, 20 seconds of blinking, 60 seconds of movement). Dense short breaks last three minutes (60/20/100 seconds); gentle short breaks last 90 seconds (20/20/50 seconds). Long-break intervals and durations are unchanged. On loading version 1 settings, unchanged shipped micro and short timings in named presets upgrade automatically; custom timings, hints, and other preferences remain intact.
+
 ## Personalization
 
 The settings page starts with presets and three reminder cards. Each reminder can be enabled independently. Disabled reminders stop automatic scheduling; manual breaks remain available. Advanced timing and content controls, system preferences, and statistics are collapsed by default.
+
+Section navigation opens the relevant collapsed group. A fixed save-status bar stays visible while scrolling. The header shows the next enabled reminder, using the scheduler's priority when times tie, and replaces its countdown during breaks and silent modes. Pause suppresses reminders while activity continues; manual focus can be ended from settings or the tray. Closing settings keeps the app running, while the exit action quits the application. Clean settings follow tray changes; unsaved drafts remain intact during state updates.
+
+Blink guidance alternates gentle eye closure, relaxation, and opening without instructing users to squeeze their eyes. Preset labels describe reminder frequency rather than claiming a medical benefit.
 
 Users can omit individual short-break steps by setting their duration to zero, while keeping at least one step. A zero-length initial eye-closure phase starts a long break directly with time away. Long breaks reserve at least one minute for time away.
 
@@ -26,7 +32,9 @@ Optional plain-text hints replace micro-reminder guidance, the short-break movem
 
 Changes save after an edit is committed (leaving a field or changing a switch). The page reports invalid drafts and failed writes, retains newer edits while saving, and offers a retry. Restoring the recommended plan resets all three reminder schedules and their hints; quiet hours, presentation, system preferences, and statistics are preserved. Selecting another preset changes its schedule values and enables reminders while retaining custom hints and other advanced choices.
 
-Short and long eye-closure phases permit one deferral. Eye closure cannot be ended early; later phases can end the session. The main process validates phase permissions and session identity.
+Every guided phase, including micro, short, and long eye closure, provides a fixed top-right exit button, a second exit button below the guidance, and Escape to cancel. Every covered display shows the controls. The tray also offers dismissal, and edge glows have a close button that accepts clicks without taking keyboard focus; the rest of the glow stays transparent to pointer input. Short and long eye-closure phases still permit one optional deferral. Escape always exits and does not use that deferral allowance.
+
+An explicit exit records a skip rather than a completed break, stops all phase timers, and hides every overlay. The skipped reminder is postponed by up to five active minutes (or its interval if shorter), and other overdue reminders receive the existing three-minute recovery grace. Late or repeated actions cannot affect a different session. The main process validates session identity and deferral eligibility.
 
 ## Quiet modes
 

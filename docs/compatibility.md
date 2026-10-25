@@ -15,7 +15,7 @@ These are implementation targets and known limits, not a claim of completed nati
 - Login integration is offered only for packaged macOS and Windows builds. Source checkouts and Linux disable that preference and show an explanation. Linux autostart is not implemented.
 - macOS menu bar icons are monochrome templates with Retina representations. Windows and Linux use colored status images. Settings and overlays share an eye/pause mark. Regenerate source images with `npm run icons`; macOS packaging creates its ICNS locally.
 - Settings follow system light/dark appearance and reduced-motion preferences. Focus outlines and labels remain available for keyboard navigation. Reminder durations and local data do not depend on color mode.
-- Display changes rebuild visible overlays without restarting the active phase. Closing the interactive overlay or losing its renderer cancels the session and hides other screens. Pending page loads cannot redisplay a cancelled overlay.
+- Display changes rebuild visible overlays without restarting the active phase. Every covered display has exit buttons and native Escape handling. Closing any overlay or losing its renderer cancels the session and hides other screens. Pending page loads cannot redisplay a cancelled overlay. Glow dismissal uses the desktop cursor position to make only its close button interactive; cursor positioning may be restricted under Wayland, where tray dismissal is also available.
 - Clicking the macOS Dock icon opens settings; the app otherwise starts in the menu bar or tray. Closing settings keeps reminders running.
 - Browser-based calls and unsupported meeting apps may not be detected. Turning off meeting reduction stops periodic process scans.
 

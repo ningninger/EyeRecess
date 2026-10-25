@@ -1,11 +1,14 @@
 # Changelog
 
-Version numbers follow [Semantic Versioning](https://semver.org/). Unreleased entries describe source changes, not an available download.
+Version numbers follow [Semantic Versioning](https://semver.org/). Release notes describe source changes and available builds.
 
-## Unreleased
+## 0.1.1
 
 ### Changed
 
+- Improved settings navigation, persistent save feedback, silent-mode status, focus cancellation, and synchronization with tray changes while preserving drafts.
+- Used gentle blink guidance and described the dense preset by frequency rather than a medical claim.
+- Reduced preset micro reminders to 20 seconds and shortened short-break plans, preserving custom settings.
 - Simplified settings with independent reminder switches, expandable content controls, custom hints, and a recommended-plan reset.
 - Added source-launch dependency checks and clarified bundled runtime requirements for release builds.
 - Clarified break schedules, settings labels, and product limitations.
@@ -13,6 +16,7 @@ Version numbers follow [Semantic Versioning](https://semver.org/). Unreleased en
 
 ### Fixed
 
+- Every guided phase and covered display offers exit buttons and Escape; cancelling hides all overlays without recording completion. Glows and the tray also provide dismissal.
 - Electron 45 runtime setup now runs during installation; existing checkouts have a dedicated repair command and offline startup checks.
 - Presets now apply the intended short-break duration.
 - Meeting mode reduces automatic short and long breaks to gentle reminders.

@@ -14,6 +14,8 @@ class Overlay {
     this.glowWin = null;
     this.breakWins = [];
     this.glowTimer = null;
+    this.glowPointerTimer = null;
+    this.glowToken = null;
     this.multiMonitor = 'all';
     this.payload = null;
     this.registered = false;
@@ -29,6 +31,10 @@ class Overlay {
       if (!msg) return;
 
       if (!security.assertTrusted(event, 'overlay')) return;
+      if (event.sender === this.glowWin?.webContents) {
+        if (msg.action === 'dismiss-glow' && msg.token === this.glowToken) this.hideGlow();
+        return;
+      }
       if (!this.breakWins.some((win) => win.webContents === event.sender)) return;
       this.onAction(msg.action, msg.token);
     });
@@ -50,6 +56,7 @@ class Overlay {
 
   showGlow(ms = 12000, hint) {
     const generation = ++this.glowGeneration;
+    this.glowToken = generation;
     const d = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
     if (!this.glowWin || this.glowWin.isDestroyed()) {
       this.glowWin = new BrowserWindow({
@@ -88,17 +95,35 @@ class Overlay {
       if (process.platform === 'darwin') {
         this.glowWin.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
       }
-      this.glowWin.setIgnoreMouseEvents(true);
       this.glowWin.loadFile(HTML, { query: { mode: 'glow' } }).catch(() => this.hideGlow());
-      this.glowWin.on('closed', () => (this.glowWin = null));
+      this.glowWin.on('closed', () => {
+        this.glowWin = null;
+        this.hideGlow();
+      });
     } else {
       this.glowWin.setBounds(d.bounds);
     }
 
     const win = this.glowWin;
+    // Keep the reminder transparent to input except over its fixed close button.
+    let ignoring = null;
+    const updatePointer = () => {
+      if (win.isDestroyed() || generation !== this.glowGeneration) return;
+      const point = screen.getCursorScreenPoint();
+      const x = point.x - d.bounds.x;
+      const y = point.y - d.bounds.y;
+      const next = !(x >= d.bounds.width - 180 && x <= d.bounds.width - 20 && y >= 20 && y <= 64);
+      if (next !== ignoring) {
+        win.setIgnoreMouseEvents(next);
+        ignoring = next;
+      }
+    };
+    clearInterval(this.glowPointerTimer);
+    updatePointer();
+    this.glowPointerTimer = setInterval(updatePointer, 100);
     const fire = () => {
       if (win.isDestroyed() || generation !== this.glowGeneration) return;
-      win.webContents.send('overlay:glow', { ms, hint, token: Date.now() });
+      win.webContents.send('overlay:glow', { ms, hint, token: generation });
       win.showInactive();
     };
     if (win.webContents.isLoading()) win.webContents.once('did-finish-load', fire);
@@ -110,6 +135,9 @@ class Overlay {
 
   hideGlow() {
     this.glowGeneration++;
+    this.glowToken = null;
+    clearInterval(this.glowPointerTimer);
+    this.glowPointerTimer = null;
     clearTimeout(this.glowTimer);
     if (this.glowWin && !this.glowWin.isDestroyed()) {
       if (!this.glowWin.webContents.isLoading()) this.glowWin.webContents.send('overlay:hide');
@@ -126,8 +154,7 @@ class Overlay {
       return;
     }
     this.destroyBreak();
-    displays.forEach((d, i) => {
-      const interactive = i === 0;
+    displays.forEach((d) => {
       const win = new BrowserWindow({
         x: d.bounds.x,
         y: d.bounds.y,
@@ -142,7 +169,7 @@ class Overlay {
         maximizable: false,
         fullscreenable: false,
         skipTaskbar: true,
-        focusable: interactive,
+        focusable: true,
         show: false,
         hasShadow: false,
         alwaysOnTop: true,
@@ -164,15 +191,19 @@ class Overlay {
       if (process.platform === 'darwin') {
         win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
       }
-      if (!interactive) win.setIgnoreMouseEvents(true);
       const dismiss = () => {
         if (!win.isDestroyed() && this.breakWins.includes(win) && this.payload) this.onDismiss();
       };
-      win.loadFile(HTML, { query: { mode: interactive ? 'break' : 'veil' } }).catch(dismiss);
+      win.loadFile(HTML, { query: { mode: 'break' } }).catch(dismiss);
+      win.webContents.on('before-input-event', (event, input) => {
+        if (input.type !== 'keyDown' || input.key !== 'Escape' || !this.payload || !this.breakWins.includes(win)) return;
+        event.preventDefault();
+        this.onAction('cancel', this.payload.token);
+      });
       win.webContents.on('render-process-gone', dismiss);
       win.on('closed', () => {
         this.breakWins = this.breakWins.filter((w) => w !== win);
-        if (interactive && this.payload && !this.rebuilding) this.onDismiss();
+        if (this.payload && !this.rebuilding) this.onDismiss();
       });
       this.breakWins.push(win);
     });
