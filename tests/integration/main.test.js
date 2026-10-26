@@ -14,7 +14,8 @@ const TRUSTED_FRAME = { url: APP_URL };
 const realSetImmediate = setImmediate;
 const realNow = Date.now;
 let now = new Date('2026-10-22T09:00:00+08:00').getTime();
-Date.now = () => now;
+let wallOffset = 0;
+Date.now = () => now + wallOffset;
 
 let timerSeq = 0;
 const timers = new Map();
@@ -100,7 +101,13 @@ function makeWindow(opts = {}) {
     listeners: {},
     webContents: {
       id: ++winIdSeq,
-      send(channel, payload) { sends.push({ win, channel, payload }); },
+      send(channel, payload) {
+        sends.push({ win, channel, payload });
+        if (channel === 'overlay:break') setImmediate(() => {
+          const event = { sender: win.webContents, senderFrame: win.webContents.mainFrame };
+          (ipcOn.get('overlay:painted') || []).forEach(fn => fn(event, payload.presentationId));
+        });
+      },
       on() {},
       once() {},
       openDevTools() {},
@@ -260,6 +267,7 @@ const electronStub = {
 const origLoad = Module._load;
 Module._load = function patched(request, parent, isMain) {
   if (request === 'electron') return electronStub;
+  if (request === 'node:perf_hooks') return { performance: { now: () => now } };
   return origLoad.apply(this, arguments);
 };
 
@@ -503,6 +511,7 @@ async function main() {
   eq((await ipcHandle.get('app:get-state')(fakeEvent())).dnd.focusUntil, 0, 'Tray exit clears manual focus');
   await ipcHandle.get('app:focus')(fakeEvent(), 45);
   const sb = await ipcHandle.get('app:start-break')(fakeEvent(), 'short');
+  await advance(0);
   eq(sb.resting, true, 'Manual breaks are available during focus');
 
   section('Display changes and window dismissal');
@@ -518,6 +527,7 @@ async function main() {
   eq((await ipcHandle.get('app:get-state')(fakeEvent())).resting, false, 'Closing the interactive overlay cancels the session');
   ok(!wins.some((win) => win.visible && !win.destroyed), 'Dismissing one overlay hides all screens');
   await ipcHandle.get('app:start-break')(fakeEvent(), 'short');
+  await advance(0);
 
   section('Lock and session cleanup');
   const completedBeforeLock = sb.stats.today.short;
@@ -529,17 +539,75 @@ async function main() {
   eq(locked.progress.micro, 0, 'Locking resets counters');
   ok(!wins.some((win) => win.visible), 'Locking hides all overlays');
   await advance(4 * 60 * 1000);
-  eq((await ipcHandle.get('app:get-state')(fakeEvent())).stats.today.short, completedBeforeLock, 'Cancelled sessions never record a later completion');
+  const duringLock = await ipcHandle.get('app:get-state')(fakeEvent());
+  eq(duringLock.stats.today.short, completedBeforeLock, 'Cancelled sessions never record a later completion');
+  eq(duringLock.stats.today.activeSec, locked.stats.today.activeSec, 'Locked time is excluded even when the idle API reports zero');
+  eq(duringLock.activity, 'away', 'Settings explain that locked time is excluded');
+  electronStub.powerMonitor.emit('unlock-screen');
   await ipcHandle.get('app:start-break')(fakeEvent(), 'short');
+  await advance(0);
   ipcMainEmit('overlay:action', { action: 'defer', token: obsoleteToken });
   await flush();
   eq((await ipcHandle.get('app:get-state')(fakeEvent())).resting, true, 'Stale actions cannot affect a new session');
+
+  section('Elapsed-time accounting and reading mode');
+  ipcMainEmit('overlay:action', { action: 'cancel', token: breaks().at(-1).payload.token });
+  await ipcHandle.get('app:patch')(fakeEvent(), {
+    micro: { enabled: false }, short: { enabled: false }, long: { enabled: false }, idle: { enabled: false },
+  });
+  const activeSeconds = async () => (await ipcHandle.get('app:get-state')(fakeEvent())).stats.today.activeSec;
+  let before = await activeSeconds();
+  now += 8000;
+  await advance(0);
+  eq(await activeSeconds() - before, 8, 'An eight-second event-loop delay records all eight awake seconds');
+  before = await activeSeconds();
+  wallOffset += 3600000;
+  await advance(1000);
+  eq(await activeSeconds() - before, 1, 'Moving the wall clock forward does not inflate activity');
+  before = await activeSeconds();
+  wallOffset -= 7200000;
+  await advance(1000);
+  eq(await activeSeconds() - before, 1, 'Moving the wall clock backward does not omit activity');
+  wallOffset = 0;
+  app.emit('activate');
+  await advance(5000);
+  const pushesBeforeClockChange = sends.filter(send => send.channel === 'app:state').length;
+  wallOffset -= 3600000;
+  await advance(5000);
+  ok(sends.filter(send => send.channel === 'app:state').length > pushesBeforeClockChange, 'Clock changes cannot freeze periodic settings updates');
+  wallOffset = 0;
+  state.idle = 3600;
+  before = await activeSeconds();
+  await advance(60000);
+  eq(await activeSeconds() - before, 60, 'Reading mode counts time without keyboard or pointer input');
+  eq((await ipcHandle.get('app:get-state')(fakeEvent())).activity, 'running', 'Reading mode identifies its runtime estimate');
+  await ipcHandle.get('app:patch')(fakeEvent(), { idle: { enabled: true } });
+  before = await activeSeconds();
+  await advance(5000);
+  eq(await activeSeconds(), before, 'Automatic idle pause remains the default counting rule');
+  eq((await ipcHandle.get('app:get-state')(fakeEvent())).activity, 'idle', 'Settings explain an idle pause');
+  state.idle = 0;
+  await advance(1000);
+  before = await activeSeconds();
+  electronStub.powerMonitor.emit('suspend');
+  const savedBeforeSleep = JSON.parse(fs.readFileSync(statsFile, 'utf8'));
+  eq(savedBeforeSleep.days[Object.keys(savedBeforeSleep.days).sort().pop()].activeSec, before, 'Sleeping flushes pending daily activity');
+  now += 600000;
+  await advance(0);
+  eq(await activeSeconds(), before, 'Sleep time is excluded when delayed timers resume');
+  electronStub.powerMonitor.emit('lock-screen');
+  electronStub.powerMonitor.emit('resume');
+  await advance(5000);
+  eq(await activeSeconds(), before, 'Resume cannot count activity while the screen is still locked');
+  electronStub.powerMonitor.emit('unlock-screen');
+  await advance(1000);
+  eq(await activeSeconds() - before, 1, 'Unlock starts a fresh activity sample without counting the gap');
 
   section('Quit');
   app.emit('before-quit');
   await flush();
   eq((await ipcHandle.get('app:get-state')(fakeEvent())).resting, false, 'Quitting clears the active session');
-  ok(!wins.some((win) => win.visible), 'Quitting hides all overlays');
+  ok(!wins.some((win) => win.visible && win.opts.focusable === true), 'Quitting hides all overlays');
 
   console.log('\n' + '-'.repeat(52));
   if (errors.length) {

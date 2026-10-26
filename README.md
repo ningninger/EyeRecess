@@ -40,8 +40,13 @@ Start with the recommended plan, then adjust it to fit your routine. EyeRecess e
 - **Start simple.** Choose a preset or keep the recommended plan.
 - **Add your own nudge.** Customize timings, break steps, and reminder text.
 - **Leave room for focus.** Pause reminders, set quiet hours, or use lighter reminders when meeting software is running.
+- **Keep reading.** Turn on Reading mode in **More settings → System** to keep time and reminders moving while you read or watch a video without touching the keyboard or pointer.
 - **Stay in control.** Exit any guided break with its exit button or Escape. Micro reminders last 20 seconds; the standard short break lasts two minutes.
 - **Keep it local.** Settings and daily summaries stay on your computer, with no account or cloud sync.
+
+### New in 0.1.2
+
+Reading mode joins more stable break covers, corrected elapsed-time accounting, and better release of background reminder resources. Idle pauses now explain themselves next to your activity summary. See the [changelog](CHANGELOG.md) for changes and validation limits.
 
 ## Your first recess
 
@@ -58,6 +63,8 @@ Start with the recommended plan, then adjust it to fit your routine. EyeRecess e
 3. Get back to your day. Start a break manually whenever you need one.
 
 Closing Settings leaves EyeRecess running. Choose **Quit** from the menu to exit.
+
+**Updating an existing installation?** Quit EyeRecess first, download the new build, and replace the old app (on macOS, replace EyeRecess in **Applications**). Settings and daily summaries are retained. Open Settings and check the version beside the app name. EyeRecess does not update itself; pulling the repository or running `npm start` does not replace an installed app.
 
 > **Ready-to-run builds include the runtime.** You do not need Node.js, npm, or Electron to use an installer or portable build. GitHub's “Source code” archives are for development.
 
@@ -79,7 +86,7 @@ The source code is public for community inspection, review, and issue reporting.
 
 Current Windows builds are also unsigned and may trigger an operating system warning. Login startup is available only in packaged macOS and Windows apps. Linux Wayland can limit overlays, window positioning, and global shortcuts; see [platform compatibility](docs/compatibility.md).
 
-Activity and meeting detection are approximate: passive reading may count as idle, and a running meeting app can reduce reminders outside a call. EyeRecess supports break habits; it does not diagnose or treat medical conditions.
+Activity and meeting detection are approximate: passive reading may count as idle, and a running meeting app can reduce reminders outside a call. Enable **Reading mode** under **More settings → System** to keep time and reminders advancing without keyboard or pointer input. Breaks, lock, and sleep still pause counting; lock your computer when leaving it. EyeRecess supports break habits; it does not diagnose or treat medical conditions.
 
 ## For the curious
 

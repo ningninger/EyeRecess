@@ -95,6 +95,10 @@ async function main() {
   receiveState({ ...snapshot(), resting: true });
   assert.notEqual(getElement('s-micro').textContent, '10:00', 'An active break does not show a work countdown');
   assert.equal(getElement('rest3').disabled, true);
+  receiveState({ ...snapshot(), activity: 'idle' });
+  assert.match(getElement('activity-hint').textContent, /\u8ba1\u65f6\u5df2\u6682\u505c/, 'Idle pauses are explained next to activity counters');
+  receiveState({ ...snapshot(), activity: 'running' });
+  assert.match(getElement('activity-hint').textContent, /\u9605\u8bfb\u6a21\u5f0f/, 'Reading mode is presented as an estimate');
   const external = sanitize(merge(cfg, { micro: { every: 720 } }));
   receiveState({ ...snapshot(), config: external });
   assert.equal(getElement('micro-every').value, 12, 'Clean inputs follow changes made outside settings');
@@ -111,6 +115,7 @@ async function main() {
   assert.equal(pending.length, 1);
   getElement('micro-every').value = '14';
   getElement('ui-sound').checked = true;
+  getElement('reading-mode').checked = true;
   await vm.runInContext('save()', context);
   assert.equal(pending.length, 1, 'Edits are queued while a save is pending');
 
@@ -119,10 +124,12 @@ async function main() {
   assert.equal(pending.length, 2, 'Queued edits are submitted after the first save');
   assert.equal(pending[1].partial.micro.every, 840, 'Queued saves use the latest input');
   assert.equal(pending[1].partial.ui.sound, true, 'Checkbox edits are preserved');
+  assert.equal(pending[1].partial.idle.enabled, false, 'Reading-mode edits pass through the existing save queue');
   complete(pending[1]);
   await firstSave;
   assert.equal(cfg.micro.every, 840);
   assert.equal(cfg.ui.sound, true);
+  assert.equal(cfg.idle.enabled, false);
 
   getElement('short-enabled').checked = false;
   getElement('micro-message').value = '<b>Take a moment</b>';

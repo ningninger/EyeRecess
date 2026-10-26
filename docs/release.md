@@ -33,6 +33,6 @@ Use this override only when the installed runtime version and architecture match
 
 Publishing requires an explicit release decision. Push a `v<version>` tag matching `package.json` to trigger `.github/workflows/release.yml`. A manual run must select that tag.
 
-The workflow runs automated tests and repository checks, builds macOS and Windows artifacts, and publishes a prerelease with checksums. Linux is not included in automated releases.
+The workflow runs automated tests and repository checks, builds macOS and Windows artifacts, and publishes a prerelease with checksums. It requires the tag to match the package version and uses that version's changelog section for release notes, followed by download and upgrade guidance. Linux is not included in automated releases.
 
 Release notes should describe user-visible changes and material compatibility limits. Do not include local paths, debugging transcripts, environment assumptions, internal module names, or unverified health claims. Current builds are unsigned; signing and notarization require separate configuration. Keep credentials in CI secrets, never in repository files.

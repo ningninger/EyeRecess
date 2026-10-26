@@ -25,6 +25,7 @@ const state = {
   progress: { streak: 1380, microLeft: 240, micro: 0.6, shortLeft: 1620, short: 0.46, longLeft: 5820, long: 0.19 },
   dnd: { label: '\u6b63\u5e38', meeting: false, focusUntil: 0, quiet: false },
   resting: false,
+  activity: 'active',
   paused: false,
   pauseLeft: 0,
   app: {
@@ -52,6 +53,7 @@ function update(partial) {
   STATE.config = merge(STATE.config, partial);
   const phases = STATE.config.short.phases;
   STATE.config.short.len = phases.eyes + phases.blink + phases.stretch;
+  STATE.activity = STATE.config.idle.enabled ? 'active' : 'running';
   return STATE;
 }
 const noop = async () => STATE;

@@ -1,7 +1,7 @@
 {
   "name": "eyerecess",
   "productName": "EyeRecess",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A local tray and menu bar app for regular screen breaks.",
   "main": "src/main/main.js",
   "license": "MIT",

@@ -2,6 +2,7 @@
 // Application composition, lifecycle, scheduling, tray, and settings IPC.
 
 const path = require('path');
+const { performance } = require('node:perf_hooks');
 const log = require('./log');
 const security = require('./security');
 
@@ -74,20 +75,31 @@ let settingsWin = null;
 
 let breaks;
 
-let lastTick = Date.now();
+let lastTick = performance.now();
 let lastPush = 0;
 let tickTimer = null;
 let quitting = false;
 let wasSilent = false;
 let shortcutPreference;
 let loginPreference;
+let suspended = false;
+let locked = false;
 
 function safeIdle() {
   try {
-    return powerMonitor.getSystemIdleTime();
+    const idle = powerMonitor.getSystemIdleTime();
+    return Number.isFinite(idle) && idle >= 0 ? idle : null;
   } catch {
-    return 0;
+    return null;
   }
+}
+
+function activityStatus(idle = safeIdle()) {
+  if (suspended || locked) return 'away';
+  if (breaks.resting) return 'resting';
+  if (!cfg.idle.enabled) return 'running';
+  if (idle === null) return 'unavailable';
+  return idle >= cfg.idle.pause ? 'idle' : 'active';
 }
 
 function fmtDur(sec) {
@@ -137,11 +149,11 @@ function handleMicro() {
 }
 
 function onTick() {
-  const now = Date.now();
-  let dt = (now - lastTick) / 1000;
-  lastTick = now;
+  const sample = performance.now();
+  const dt = (sample - lastTick) / 1000;
+  lastTick = sample;
   if (!(dt > 0)) return;
-  if (dt > 5) dt = 1;
+  if (suspended || locked) return;
 
   if (cfg.dnd.meetingDowngrade) dnd.scan();
 
@@ -153,20 +165,20 @@ function onTick() {
   wasSilent = silent;
 
   const due = tracker.tick(dt, idle, { paused, silent });
-  if (idle >= cfg.idle.rest && !breaks.resting) breaks.resetDeferrals();
+  if (cfg.idle.enabled && idle >= cfg.idle.rest && !breaks.resting) breaks.resetDeferrals();
   if (tracker.lastAccumulated > 0) stats.addActive(tracker.lastAccumulated);
 
   if (due) onDue(due);
 
   updateTray();
-  if (now - lastPush > 4000) {
-    lastPush = now;
+  if (sample - lastPush > 4000) {
+    lastPush = sample;
     pushState();
   }
 }
 
 function startTicking() {
-  lastTick = Date.now();
+  lastTick = performance.now();
   clearInterval(tickTimer);
   tickTimer = setInterval(onTick, 1000);
 }
@@ -189,8 +201,8 @@ function updateTray(force = false) {
       : `EyeRecess · 连续用眼 ${fmtDur(p.streak)}，${cfg.micro.enabled ? `${fmtDur(p.microLeft)}后微休息` : '微休息已关闭'}`;
   tray.setToolTip(tip);
 
-  if (force || Date.now() - lastMenuBuild > 15000) {
-    lastMenuBuild = Date.now();
+  if (force || performance.now() - lastMenuBuild > 15000) {
+    lastMenuBuild = performance.now();
     try {
       tray.setContextMenu(buildMenu());
     } catch {
@@ -364,6 +376,7 @@ function getState() {
       quiet: dnd.inQuietHours(cfg),
     },
     resting: breaks.resting,
+    activity: activityStatus(),
     paused: isPaused(),
     pauseLeft: isPaused() ? Math.ceil((cfg.pausedUntil - Date.now()) / 60000) : 0,
     app: {
@@ -554,7 +567,7 @@ function init() {
   breaks = new BreakController({
     getConfig: () => cfg, tracker, stats, overlay, beep: () => shell.beep(),
     onChange: () => {
-      lastTick = Date.now();
+      lastTick = performance.now();
       if (quitting) return;
       updateTray(true);
       pushState();
@@ -569,21 +582,37 @@ function init() {
     tracker.reset();
     overlay.hideGlow();
     breaks.reset();
+    lastTick = performance.now();
+    if (stats.dirty) stats.save();
+    updateTray(true);
+    pushState();
   };
-  powerMonitor.on('suspend', resetWorkSession);
-  powerMonitor.on('resume', () => {
-    tracker.reset();
-    lastTick = Date.now();
+  powerMonitor.on('suspend', () => {
+    suspended = true;
+    resetWorkSession();
   });
-  powerMonitor.on('lock-screen', resetWorkSession);
+  powerMonitor.on('resume', () => {
+    suspended = false;
+    tracker.reset();
+    lastTick = performance.now();
+    pushState();
+  });
+  powerMonitor.on('lock-screen', () => {
+    locked = true;
+    resetWorkSession();
+  });
   powerMonitor.on('unlock-screen', () => {
-    lastTick = Date.now();
+    locked = false;
+    lastTick = performance.now();
+    pushState();
   });
 
   const refreshDisplays = () => { overlay.hideGlow(); overlay.refreshBreak(); };
   screen.on('display-added', refreshDisplays);
   screen.on('display-removed', refreshDisplays);
-  screen.on('display-metrics-changed', refreshDisplays);
+  screen.on('display-metrics-changed', (_event, _display, changedMetrics) => {
+    if (!changedMetrics || changedMetrics.some((key) => ['bounds', 'scaleFactor', 'rotation'].includes(key))) refreshDisplays();
+  });
 
 }
 

@@ -64,12 +64,12 @@ class Tracker {
     if (!(dt > 0)) return null;
     const c = this.cfg;
 
-    if (idle >= c.idle.rest) {
+    if (c.idle.enabled && idle >= c.idle.rest) {
       if (this.micro || this.short || this.long) this.reset();
       return null;
     }
 
-    if (idle >= c.idle.pause) {
+    if (c.idle.enabled && idle >= c.idle.pause) {
       this.micro = 0;
       return null;
     }

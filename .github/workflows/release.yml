@@ -88,9 +88,38 @@ jobs:
     needs: [build-mac, build-win]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Prepare release notes
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const version = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
+          if (process.env.RELEASE_TAG !== `v${version}`) throw new Error('Release tag must match package.json');
+          const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+          const marker = `## ${version}\n`;
+          const start = changelog.indexOf(marker);
+          if (start < 0) throw new Error('Missing versioned changelog');
+          const changes = changelog.slice(start + marker.length).split('\n## ')[0].trim();
+          const notes = [
+            `EyeRecess ${process.env.RELEASE_TAG} helps you build a regular screen-break habit.`,
+            changes,
+            '### Download and update',
+            'Choose the DMG for your Mac architecture, or the Windows installer or portable executable. Downloads include the runtime; Node.js, npm, and a separate Electron installation are not required. Source archives require developer setup.',
+            'Quit the old app before replacing it with this build. Settings and daily summaries are retained. Check the version in Settings after reopening. EyeRecess has no automatic updater.',
+            'Current builds are unsigned and may trigger an operating system warning. See the README for installation guidance and limitations.',
+          ].join('\n\n') + '\n';
+          fs.mkdirSync('.local/release', { recursive: true });
+          fs.writeFileSync('.local/release/notes.md', notes);
+          JS
 
       - name: Checksums
         run: |
@@ -102,15 +131,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           prerelease: true
-          generate_release_notes: true
-          body: |
-            EyeRecess ${{ github.ref_name }} helps you build a regular screen-break habit.
-
-            Download the DMG for your Mac architecture, or the Windows installer or portable executable.
-            Application downloads include the runtime; Node.js, npm, and a separate Electron installation are not required.
-            GitHub source archives require developer setup and are not ready-to-run application builds.
-            Current builds are unsigned and may trigger an operating system warning.
-            See the changelog for changes and the README for installation and limitations.
+          body_path: .local/release/notes.md
           files: |
             artifacts/**/*.dmg
             artifacts/**/*.zip

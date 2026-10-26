@@ -269,6 +269,13 @@ section('Tracker: idle handling');
   eq(t3.short, 0, 'Long idle resets the short counter');
   eq(t3.long, 0, 'Long idle resets the long counter');
   eq(t3.streak, 0, 'Long idle resets the displayed streak');
+  const reading = new Tracker(sanitize({ idle: { enabled: false } }));
+  reading.tick(600, 3600, { silent: true });
+  eq(reading.lastAccumulated, 600, 'Disabling idle detection counts reading and video time');
+  eq(reading.short, 600, 'Reading mode also advances reminder counters');
+  reading.tick(20, 3600, { paused: true });
+  eq(reading.lastAccumulated, 0, 'Reading mode still excludes active breaks');
+  eq(sanitize({ idle: { enabled: 'false' } }).idle.enabled, true, 'Malformed idle preferences retain the safe default');
 }
 
 section('Tracker: active break handling');

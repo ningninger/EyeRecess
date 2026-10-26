@@ -6,6 +6,8 @@ This document records the current behavior contract. Numeric defaults live in `s
 
 - Activity is estimated from recent keyboard or pointer input, not actual gaze.
 - Short idle periods pause accumulation and reset the micro-break counter. Longer idle periods reset all break counters.
+- By default, 60 seconds without input pauses accumulation and 180 seconds resets reminder counters. Reading and video playback can therefore pause the estimate. Users can enable reading mode under advanced system settings; this keeps time and reminders advancing without input, and counts time away from an unlocked computer. Breaks, lock, and sleep still stop activity accumulation. Reading mode is off by default and persists across restarts and preset changes. The status area explains the current counting rule and idle pauses. This is an estimate, not a screen-time or gaze measurement.
+- Delayed awake samples retain their elapsed duration. Changing the system calendar does not change elapsed activity. Summaries refresh approximately every five seconds; statistics are saved in batches and flushed on lock, suspend, and normal quit. Abrupt termination can still lose the most recent unsaved batch. Calendar dates follow the system date.
 - Sleeping or locking ends the active break and resets work counters. Restarting preserves settings and daily summaries, but starts new work counters.
 - When multiple reminders are due, long breaks take priority over short breaks, followed by micro breaks.
 - Completing a break resets counters for that level and shorter levels.

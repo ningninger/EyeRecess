@@ -58,6 +58,7 @@ const COLORS = { eyes: '#9ddbb8', blink: '#e4bd7b', stretch: '#9ddbb8', away: '#
 
 let cur = null;
 let raf = 0;
+let paintRaf = 0;
 let lastBlinkKey = '';
 
 function fmtLeft(ms) {
@@ -122,7 +123,14 @@ function showBreak(s) {
   footEl.textContent = '随时可以退出 · Esc 退出本次休息';
 
   cancelAnimationFrame(raf);
+  cancelAnimationFrame(paintRaf);
   frame();
+  // Two frames allow the new content to paint while the native window is hidden.
+  paintRaf = requestAnimationFrame(() => {
+    paintRaf = requestAnimationFrame(() => {
+      if (cur === s) window.ov.painted(s.presentationId);
+    });
+  });
 }
 
 deferBtn.addEventListener('click', () => {
@@ -151,6 +159,7 @@ window.ov.onHide(() => {
   cur = null;
   glowToken = null;
   cancelAnimationFrame(raf);
+  cancelAnimationFrame(paintRaf);
   clearTimeout(glowTimer);
   glowEl.hidden = brkEl.hidden = true;
 });

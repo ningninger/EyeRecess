@@ -86,6 +86,8 @@ function renderConfig(cfg) {
 
   setChk('ui-glow', cfg.ui.glow);
   setChk('ui-sound', cfg.ui.sound);
+  setChk('reading-mode', !cfg.idle.enabled);
+  $('reading-hint').textContent = `阅读模式开启后，阅读或看视频时持续计时并正常提醒；离开电脑时也会累计，请及时锁屏。关闭时，无操作 ${fmtDur(cfg.idle.pause)}暂停累计，${fmtDur(cfg.idle.rest)}重置提醒进度。休息、锁屏和睡眠期间均暂停累计。`;
 
   setChk('launchAtLogin', cfg.system.launchAtLogin);
   setChk('hideDock', cfg.system.hideDock);
@@ -152,6 +154,7 @@ function collect() {
       quietHours: { enabled: chk('quietOn'), start: val('quietStart'), end: val('quietEnd') },
     },
     ui: { glow: chk('ui-glow'), sound: chk('ui-sound') },
+    idle: { enabled: !chk('reading-mode') },
     system: {
       launchAtLogin: chk('launchAtLogin'),
       hideDock: chk('hideDock'),
@@ -289,6 +292,15 @@ function renderStatus(s) {
   $('next-label').textContent = kind ? `下次${label}` : '自动提醒';
   $('s-micro').textContent = s.resting ? '休息中' : silent ? '免打扰' : kind ? fmtClock(p[kind + 'Left']) : '已关闭';
   $('s-today').textContent = fmtDur(s.stats.today.activeSec);
+  const activityText = {
+    idle: '无键鼠操作，计时已暂停。阅读或看视频时，可在更多设置 → 系统中开启阅读模式。',
+    resting: '休息期间不累计活跃时间。',
+    away: '锁屏或睡眠期间不累计活跃时间。',
+    running: '阅读模式已开启，正在持续计时；离开电脑时请锁屏。',
+    unavailable: '当前无法判断键鼠空闲，暂按运行时间估算。',
+    active: '按键鼠活动估算活跃时间；阅读或看视频时，可在更多设置 → 系统中开启阅读模式。',
+  };
+  $('activity-hint').textContent = activityText[s.activity] || activityText.active;
   $('bar-micro').style.width = `${!silent && !s.resting && kind ? Math.round(p[kind] * 100) : 0}%`;
 
   const dot = $('dot');
@@ -383,7 +395,7 @@ const INPUTS = [
 ];
 
 const MESSAGES = ['micro-message', 'short-message', 'long-message'];
-const CHECKS = ['micro-enabled', 'short-enabled', 'long-enabled', 'meetingDowngrade', 'quietOn', 'ui-glow', 'ui-sound', 'launchAtLogin', 'hideDock', 'shortcuts'];
+const CHECKS = ['micro-enabled', 'short-enabled', 'long-enabled', 'meetingDowngrade', 'quietOn', 'ui-glow', 'ui-sound', 'reading-mode', 'launchAtLogin', 'hideDock', 'shortcuts'];
 
 for (const id of [...INPUTS, ...CHECKS, ...MESSAGES]) {
   const el = $(id);

@@ -79,6 +79,7 @@ const DEFAULTS = {
   },
 
   idle: {
+    enabled: true,
     pause: 60,
     rest: 180,
   },
@@ -166,7 +167,7 @@ function sanitize(cfg) {
     c[kind].defer = Math.round(clampNum(c[kind].defer, 0, 1, 1));
     c[kind].deferMinutes = Math.round(clampNum(c[kind].deferMinutes, 1, 60, 5));
   }
-  for (const key of ['ui', 'dnd', 'system']) {
+  for (const key of ['ui', 'idle', 'dnd', 'system']) {
     for (const [field, fallback] of Object.entries(DEFAULTS[key])) {
       if (typeof fallback === 'boolean' && typeof c[key][field] !== 'boolean') c[key][field] = fallback;
     }

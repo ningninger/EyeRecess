@@ -47,3 +47,11 @@ Automated substitutes do not verify layout, focus, operating system permissions,
 Tests use isolated temporary directories or `.boot-test/`. Developer previews and private notes belong under `.local/`. Both are ignored. Do not depend on private local files in code, tests, packaging, or CI.
 
 Use the tray's log-folder action for local troubleshooting. Share only relevant, reviewed excerpts; never attach complete environment dumps or user data by default.
+
+## Native memory checks
+
+Run `node scripts/dev/memory-check.cjs --expect-idle-release` with a desktop and an installed Electron runtime. It starts an isolated source instance, cycles micro/short/long reminders and settings, and samples idle periods. Application settings, test data, and reports stay under a unique ignored `.local/memory-check/` directory. Hidden native windows avoid interrupting other work; this does not validate visible compositor allocation, focus, or multi-display behavior.
+
+The default run uses three rounds of 60 cycles, a 10-cycle warm-up, and 70 idle seconds after each round. Optional `--rounds=`, `--cycles=`, `--idle-seconds=`, and `--label=` arguments control the bounded workload. A 20-minute timeout and 1.5 GiB sampled working-set budget stop excessive runs. Use an idle period above 60 seconds when checking retirement. This tool is opt-in and is not part of normal startup or CI.
+
+Reports contain process working sets, main-process heap before/after diagnostic garbage collection, renderer heap and DOM counters, window counts, timer resources, and listener counts. Garbage collection is enabled only for this development run. Sampling and the report itself allocate memory. Summed working sets can double-count shared pages; they differ from macOS Activity Monitor's memory footprint, and do not include WindowServer's allocations. Inspect the trend after warm-up and repeated idle periods rather than treating a high single sample as a leak. Stable short tests cannot prove the absence of leaks during days of use, graphics-driver changes, or other desktop environments.

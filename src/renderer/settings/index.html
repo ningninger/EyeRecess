@@ -36,6 +36,7 @@
       </div>
 
       <div class="bar" aria-hidden="true"><i id="bar-micro"></i></div>
+      <p class="note" id="activity-hint" role="status"></p>
 
       <div class="quick">
         <button class="primary" id="rest3">立即短休息</button>
@@ -186,6 +187,8 @@
 
       <section id="sec-system">
         <h2>系统</h2>
+        <label class="check"><input type="checkbox" id="reading-mode" /> 阅读模式（无键鼠操作也持续计时）</label>
+        <p class="note" id="reading-hint"></p>
         <label class="check" id="row-launchAtLogin"><input type="checkbox" id="launchAtLogin" /> 登录后自动启动</label>
         <p class="note" id="login-hint" hidden>自动启动适用于已安装的 macOS 和 Windows 应用；当前运行方式暂不支持。</p>
         <label class="check" id="row-hideDock"><input type="checkbox" id="hideDock" /> 隐藏 Dock 图标，只留菜单栏（macOS）</label>

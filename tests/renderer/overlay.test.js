@@ -19,16 +19,24 @@ function element(id) {
   return elements.get(id);
 }
 const actions = [];
+const paints = [];
 const handlers = {};
 let keydown;
+let taskId = 0;
+const animations = new Map();
+const timeouts = new Map();
 const context = vm.createContext({
   document: { getElementById: element, body: element('body'), documentElement: { style: { setProperty() {} } } },
   location: { search: '?mode=break' }, URLSearchParams,
-  requestAnimationFrame: () => 1, cancelAnimationFrame() {}, setTimeout: () => 1, clearTimeout() {},
+  requestAnimationFrame: fn => { const id = ++taskId; animations.set(id, fn); return id; },
+  cancelAnimationFrame: id => animations.delete(id),
+  setTimeout: fn => { const id = ++taskId; timeouts.set(id, fn); return id; },
+  clearTimeout: id => timeouts.delete(id),
   window: {
     addEventListener: (name, fn) => { if (name === 'keydown') keydown = fn; },
     ov: {
       action: (...args) => actions.push(args),
+      painted: id => paints.push(id),
       onGlow: (fn) => { handlers.glow = fn; }, onBreak: (fn) => { handlers.break = fn; }, onHide: (fn) => { handlers.hide = fn; },
     },
   },
@@ -62,4 +70,28 @@ handlers.hide();
 const before = actions.length;
 element('dismissGlow').click();
 assert.equal(actions.length, before);
-console.log('Overlay renderer tests passed: both exit buttons, Escape, glow dismissal, and hidden-state cleanup');
+for (let i = 0; i < 1000; i++) {
+  handlers.break({ token: i, phase: 'blink', kind: 'short', ms: 20000, endsAt: Date.now() + 20000 });
+  handlers.glow({ token: i, ms: 20000 });
+  assert.equal(animations.size, 2, 'Replacement phases retain one animation loop and one bounded paint acknowledgement');
+  assert.equal(timeouts.size, 1, 'Replacement reminders retain exactly one glow timeout');
+  handlers.hide();
+  assert.equal(animations.size, 0, 'Hidden overlays stop animation work');
+  assert.equal(timeouts.size, 0, 'Hidden overlays stop glow timeouts');
+}
+function frame() {
+  const batch = [...animations];
+  animations.clear();
+  batch.forEach(([, fn]) => fn());
+}
+handlers.break({ token: 2000, presentationId: 99, phase: 'eyes', kind: 'short', ms: 20000, endsAt: Date.now() + 20000 });
+frame();
+assert.equal(paints.length, 0, 'The first frame is not yet a completed content paint');
+frame();
+assert.deepEqual(paints, [99], 'The renderer acknowledges the current presentation after two frames');
+handlers.break({ token: 2001, presentationId: 100, phase: 'eyes', kind: 'short', ms: 20000, endsAt: Date.now() + 20000 });
+frame();
+handlers.hide();
+frame();
+assert.deepEqual(paints, [99], 'Cancellation prevents a late paint acknowledgement');
+console.log('Overlay renderer tests passed: exit controls and bounded animation/timer lifetimes across 1000 cycles');
